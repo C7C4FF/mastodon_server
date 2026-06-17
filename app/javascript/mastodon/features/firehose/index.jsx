@@ -4,16 +4,15 @@ import { useRef, useCallback, useEffect } from 'react';
 import { useIntl, defineMessages, FormattedMessage } from 'react-intl';
 
 import { Helmet } from '@unhead/react/helmet';
-import { NavLink } from 'react-router-dom';
 
 import { useIdentity } from '@/mastodon/identity_context';
 import PublicIcon from '@/material-icons/400-24px/public.svg?react';
 import { addColumn } from 'mastodon/actions/columns';
 import { changeSetting } from 'mastodon/actions/settings';
-import { connectPublicStream, connectCommunityStream } from 'mastodon/actions/streaming';
-import { expandPublicTimeline, expandCommunityTimeline } from 'mastodon/actions/timelines';
+import { connectCommunityStream } from 'mastodon/actions/streaming';
+import { expandCommunityTimeline } from 'mastodon/actions/timelines';
 import { DismissableBanner } from 'mastodon/components/dismissable_banner';
-import { localLiveFeedAccess, remoteLiveFeedAccess, domain } from 'mastodon/initial_state';
+import { localLiveFeedAccess, domain } from 'mastodon/initial_state';
 import { canViewFeed } from 'mastodon/permissions';
 import { useAppDispatch, useAppSelector } from 'mastodon/store';
 
@@ -23,15 +22,7 @@ import SettingToggle from '../notifications/components/setting_toggle';
 import StatusListContainer from '../ui/containers/status_list_container';
 
 const messages = defineMessages({
-  title: { id: 'column.firehose', defaultMessage: 'Live feeds' },
-  title_local: {
-    id: 'column.firehose_local',
-    defaultMessage: 'Live feed for this server',
-  },
-  title_singular: {
-    id: 'column.firehose_singular',
-    defaultMessage: 'Live feed',
-  },
+  title: { id: 'column.firehose', defaultMessage: 'Local timeline' },
 });
 
 const ColumnSettings = () => {
@@ -58,47 +49,28 @@ const ColumnSettings = () => {
   );
 };
 
-const Firehose = ({ feedType, multiColumn }) => {
+const Firehose = ({ multiColumn }) => {
   const dispatch = useAppDispatch();
   const intl = useIntl();
   const { signedIn, permissions } = useIdentity();
   const columnRef = useRef(null);
+  const feedType = 'community';
 
   const onlyMedia = useAppSelector((state) => state.getIn(['settings', 'firehose', 'onlyMedia'], false));
   const hasUnread = useAppSelector((state) => state.getIn(['timelines', `${feedType}${onlyMedia ? ':media' : ''}`, 'unread'], 0) > 0);
 
   const handlePin = useCallback(
     () => {
-      switch(feedType) {
-      case 'community':
-        dispatch(addColumn('COMMUNITY', { other: { onlyMedia } }));
-        break;
-      case 'public':
-        dispatch(addColumn('PUBLIC', { other: { onlyMedia } }));
-        break;
-      case 'public:remote':
-        dispatch(addColumn('REMOTE', { other: { onlyMedia, onlyRemote: true } }));
-        break;
-      }
+      dispatch(addColumn('COMMUNITY', { other: { onlyMedia } }));
     },
-    [dispatch, onlyMedia, feedType],
+    [dispatch, onlyMedia],
   );
 
   const handleLoadMore = useCallback(
     (maxId) => {
-      switch(feedType) {
-      case 'community':
-        dispatch(expandCommunityTimeline({ maxId, onlyMedia }));
-        break;
-      case 'public':
-        dispatch(expandPublicTimeline({ maxId, onlyMedia }));
-        break;
-      case 'public:remote':
-        dispatch(expandPublicTimeline({ maxId, onlyMedia, onlyRemote: true }));
-        break;
-      }
+      dispatch(expandCommunityTimeline({ maxId, onlyMedia }));
     },
-    [dispatch, onlyMedia, feedType],
+    [dispatch, onlyMedia],
   );
 
   const handleHeaderClick = useCallback(() => columnRef.current?.scrollTop(), []);
@@ -106,31 +78,15 @@ const Firehose = ({ feedType, multiColumn }) => {
   useEffect(() => {
     let disconnect;
 
-    switch(feedType) {
-    case 'community':
-      dispatch(expandCommunityTimeline({ onlyMedia }));
-      if (signedIn) {
-        disconnect = dispatch(connectCommunityStream({ onlyMedia }));
-      }
-      break;
-    case 'public':
-      dispatch(expandPublicTimeline({ onlyMedia }));
-      if (signedIn) {
-        disconnect = dispatch(connectPublicStream({ onlyMedia }));
-      }
-      break;
-    case 'public:remote':
-      dispatch(expandPublicTimeline({ onlyMedia, onlyRemote: true }));
-      if (signedIn) {
-        disconnect = dispatch(connectPublicStream({ onlyMedia, onlyRemote: true }));
-      }
-      break;
+    dispatch(expandCommunityTimeline({ onlyMedia }));
+    if (signedIn) {
+      disconnect = dispatch(connectCommunityStream({ onlyMedia }));
     }
 
     return () => disconnect?.();
-  }, [dispatch, signedIn, feedType, onlyMedia]);
+  }, [dispatch, signedIn, onlyMedia]);
 
-  const prependBanner = feedType === 'community' ? (
+  const prependBanner = (
     <DismissableBanner id='community_timeline'>
       <FormattedMessage
         id='dismissable_banner.community_timeline'
@@ -138,29 +94,16 @@ const Firehose = ({ feedType, multiColumn }) => {
         values={{ domain }}
       />
     </DismissableBanner>
-  ) : (
-    <DismissableBanner id='public_timeline'>
-      <FormattedMessage
-        id='dismissable_banner.public_timeline'
-        defaultMessage='These are the most recent public posts from people on the fediverse that people on {domain} follow.'
-        values={{ domain }}
-      />
-    </DismissableBanner>
   );
 
-  const emptyMessage = feedType === 'community' ? (
+  const emptyMessage = (
     <FormattedMessage
       id='empty_column.community'
       defaultMessage='The local timeline is empty. Write something publicly to get the ball rolling!'
     />
-  ) : (
-    <FormattedMessage
-      id='empty_column.public'
-      defaultMessage='There is nothing here! Write something publicly, or manually follow users from other servers to fill it up'
-    />
   );
 
-  const canViewSelectedFeed = canViewFeed(signedIn, permissions, feedType === 'community' ? localLiveFeedAccess : remoteLiveFeedAccess);
+  const canViewSelectedFeed = canViewFeed(signedIn, permissions, localLiveFeedAccess);
 
   const disabledTimelineMessage = (
     <FormattedMessage
@@ -169,45 +112,19 @@ const Firehose = ({ feedType, multiColumn }) => {
     />
   );
 
-  let title;
-
-  if (canViewFeed(signedIn, permissions, localLiveFeedAccess) && canViewFeed(signedIn, permissions, remoteLiveFeedAccess)) {
-    title = messages.title;
-  } else if (canViewFeed(signedIn, permissions, localLiveFeedAccess)) {
-    title = messages.title_local;
-  } else {
-    title = messages.title_singular;
-  }
-
   return (
     <Column bindToDocument={!multiColumn} ref={columnRef} label={intl.formatMessage(messages.title)}>
       <ColumnHeader
         icon='globe'
         iconComponent={PublicIcon}
         active={hasUnread}
-        title={intl.formatMessage(title)}
+        title={intl.formatMessage(messages.title)}
         onPin={handlePin}
         onClick={handleHeaderClick}
         multiColumn={multiColumn}
       >
         <ColumnSettings />
       </ColumnHeader>
-
-      {(canViewFeed(signedIn, permissions, localLiveFeedAccess) && canViewFeed(signedIn, permissions, remoteLiveFeedAccess)) && (
-        <div className='account__section-headline'>
-          <NavLink exact to='/public/local'>
-            <FormattedMessage tagName='div' id='firehose.local' defaultMessage='This server' />
-          </NavLink>
-
-          <NavLink exact to='/public/remote'>
-            <FormattedMessage tagName='div' id='firehose.remote' defaultMessage='Other servers' />
-          </NavLink>
-
-          <NavLink exact to='/public'>
-            <FormattedMessage tagName='div' id='firehose.all' defaultMessage='All' />
-          </NavLink>
-        </div>
-      )}
 
       <StatusListContainer
         prepend={prependBanner}
@@ -229,7 +146,6 @@ const Firehose = ({ feedType, multiColumn }) => {
 
 Firehose.propTypes = {
   multiColumn: PropTypes.bool,
-  feedType: PropTypes.string,
 };
 
 export default Firehose;
