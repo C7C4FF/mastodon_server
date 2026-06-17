@@ -29,6 +29,10 @@ import {
 const StandaloneBoostButton: FC<ReblogButtonProps> = ({ status, counters }) => {
   const intl = useIntl();
   const dispatch = useAppDispatch();
+  const boostsCount =
+    (status.get('reblogs_count') as number) +
+    (status.get('quotes_count') as number);
+  const visibleBoostsCount = Math.max(boostsCount, status.get('reblogged') ? 1 : 0);
 
   const statusState = useAppSelector((state) =>
     selectStatusState(state, status),
@@ -67,12 +71,7 @@ const StandaloneBoostButton: FC<ReblogButtonProps> = ({ status, counters }) => {
       iconComponent={iconComponent}
       className='status__action-bar__button'
       onClick={!disabled ? handleClick : undefined}
-      counter={
-        counters
-          ? (status.get('reblogs_count') as number) +
-            (status.get('quotes_count') as number)
-          : undefined
-      }
+      counter={counters && visibleBoostsCount > 0 ? visibleBoostsCount : undefined}
     />
   );
 };
@@ -115,6 +114,10 @@ const BoostOrQuoteMenu: FC<ReblogButtonProps> = ({ status, counters }) => {
   const statusId = status.get('id') as string;
   const wasBoosted = !!status.get('reblogged');
   const quoteApproval = status.get('quote_approval');
+  const boostsCount =
+    (status.get('reblogs_count') as number) +
+    (status.get('quotes_count') as number);
+  const visibleBoostsCount = Math.max(boostsCount, isReblogged ? 1 : 0);
 
   const showLoginPrompt = useCallback(() => {
     dispatch(
@@ -200,12 +203,7 @@ const BoostOrQuoteMenu: FC<ReblogButtonProps> = ({ status, counters }) => {
         icon='retweet'
         className='status__action-bar__button'
         iconComponent={boostIcon}
-        counter={
-          counters
-            ? (status.get('reblogs_count') as number) +
-              (status.get('quotes_count') as number)
-            : undefined
-        }
+        counter={counters && visibleBoostsCount > 0 ? visibleBoostsCount : undefined}
         active={isReblogged}
       />
     </Dropdown>

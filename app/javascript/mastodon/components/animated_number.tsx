@@ -11,6 +11,8 @@ interface Props {
 }
 export const AnimatedNumber: React.FC<Props> = ({ value }) => {
   const [previousValue, setPreviousValue] = useState(value);
+  const [hasMounted, setHasMounted] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const direction = value > previousValue ? -1 : 1;
 
   const [styles, api] = useSpring(
@@ -19,6 +21,7 @@ export const AnimatedNumber: React.FC<Props> = ({ value }) => {
       to: { transform: 'translateY(0%)' },
       onRest() {
         setPreviousValue(value);
+        setIsAnimating(false);
       },
       config: { ...config.gentle, duration: 200 },
       immediate: true, // This ensures that the animation is not played when the component is first rendered
@@ -28,12 +31,17 @@ export const AnimatedNumber: React.FC<Props> = ({ value }) => {
 
   // When the value changes, start the animation
   useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (value !== previousValue) {
+      setIsAnimating(true);
       void api.start({ reset: true });
     }
   }, [api, previousValue, value]);
 
-  if (reduceMotion) {
+  if (reduceMotion || !hasMounted || !isAnimating) {
     return <ShortNumber value={value} />;
   }
 

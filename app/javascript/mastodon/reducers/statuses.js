@@ -69,6 +69,56 @@ const removeStatusStub = (state, id) => {
   return state.getIn([id, 'id']) ? state.deleteIn([id, 'isLoading']) : state.delete(id);
 }
 
+const incrementStatusCount = (state, id, key) =>
+  state.updateIn([id, key], 0, count => Math.max(0, (Number(count) || 0) + 1));
+
+const decrementStatusCount = (state, id, key) =>
+  state.updateIn([id, key], 0, count => Math.max(0, (Number(count) || 0) - 1));
+
+const favouriteStatus = (state, status) => {
+  const id = status.get('id');
+
+  if (state.get(id) === undefined) {
+    return state;
+  }
+
+  return state.getIn([id, 'favourited']) ?
+    state :
+    incrementStatusCount(state, id, 'favourites_count').setIn([id, 'favourited'], true);
+};
+
+const unfavouriteStatus = (state, status) => {
+  const id = status.get('id');
+
+  if (state.get(id) === undefined) {
+    return state;
+  }
+
+  return state.getIn([id, 'favourited']) ?
+    decrementStatusCount(state, id, 'favourites_count').setIn([id, 'favourited'], false) :
+    state;
+};
+
+const reblogStatus = (state, id) => {
+  if (state.get(id) === undefined) {
+    return state;
+  }
+
+  return state.getIn([id, 'reblogged']) ?
+    state :
+    incrementStatusCount(state, id, 'reblogs_count').setIn([id, 'reblogged'], true);
+};
+
+const unreblogStatus = (state, id) => {
+  if (state.get(id) === undefined) {
+    return state;
+  }
+
+  return state.getIn([id, 'reblogged']) ?
+    decrementStatusCount(state, id, 'reblogs_count').setIn([id, 'reblogged'], false) :
+    state;
+};
+
 
 /** @type {ImmutableMap<string, import('mastodon/models/status').Status>} */
 const initialState = ImmutableMap();
@@ -107,13 +157,13 @@ export default function statuses(state = initialState, action) {
   case STATUSES_IMPORT:
     return importStatuses(state, action.statuses);
   case FAVOURITE_REQUEST:
-    return state.setIn([action.status.get('id'), 'favourited'], true);
+    return favouriteStatus(state, action.status);
   case FAVOURITE_FAIL:
-    return state.get(action.status.get('id')) === undefined ? state : state.setIn([action.status.get('id'), 'favourited'], false);
+    return unfavouriteStatus(state, action.status);
   case UNFAVOURITE_REQUEST:
-    return state.setIn([action.status.get('id'), 'favourited'], false);
+    return unfavouriteStatus(state, action.status);
   case UNFAVOURITE_FAIL:
-    return state.get(action.status.get('id')) === undefined ? state : state.setIn([action.status.get('id'), 'favourited'], true);
+    return favouriteStatus(state, action.status);
   case BOOKMARK_REQUEST:
     return state.get(action.status.get('id')) === undefined ? state : state.setIn([action.status.get('id'), 'bookmarked'], true);
   case BOOKMARK_FAIL:
@@ -152,13 +202,13 @@ export default function statuses(state = initialState, action) {
     return statusTranslateUndo(state, action.id);
   default:
     if(reblog.pending.match(action))
-      return state.setIn([action.meta.arg.statusId, 'reblogged'], true);
+      return reblogStatus(state, action.meta.arg.statusId);
     else if(reblog.rejected.match(action))
-      return state.get(action.meta.arg.statusId) === undefined ? state : state.setIn([action.meta.arg.statusId, 'reblogged'], false);
+      return unreblogStatus(state, action.meta.arg.statusId);
     else if(unreblog.pending.match(action))
-      return state.setIn([action.meta.arg.statusId, 'reblogged'], false);
+      return unreblogStatus(state, action.meta.arg.statusId);
     else if(unreblog.rejected.match(action))
-      return state.get(action.meta.arg.statusId) === undefined ? state : state.setIn([action.meta.arg.statusId, 'reblogged'], true);
+      return reblogStatus(state, action.meta.arg.statusId);
     else
       return state;
   }

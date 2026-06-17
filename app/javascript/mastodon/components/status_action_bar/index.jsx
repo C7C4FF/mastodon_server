@@ -250,7 +250,7 @@ class StatusActionBar extends ImmutablePureComponent {
   };
 
   render () {
-    const { status, relationship, statusQuoteState, quotedAccountId, contextType, intl, withDismiss, withCounters, scrollKey } = this.props;
+    const { status, relationship, statusQuoteState, quotedAccountId, contextType, intl, withDismiss, scrollKey } = this.props;
     const { signedIn, permissions } = this.props.identity;
 
     const publicStatus       = ['public', 'unlisted'].includes(status.get('visibility'));
@@ -386,17 +386,20 @@ class StatusActionBar extends ImmutablePureComponent {
     const isReply = status.get('in_reply_to_account_id') === status.getIn(['account', 'id']);
 
     const shouldShowQuoteRemovalHint = isQuotingMe && contextType === 'notifications';
+    const repliesCount = Number(status.get('replies_count')) || 0;
+    const favouritesCount = Number(status.get('favourites_count')) || 0;
+    const visibleFavouritesCount = Math.max(favouritesCount, status.get('favourited') ? 1 : 0);
 
     return (
       <div className='status__action-bar'>
         <div className='status__action-bar__button-wrapper'>
-          <IconButton className='status__action-bar__button' title={replyTitle} icon={isReply ? 'reply' : replyIcon} iconComponent={isReply ? ReplyIcon : replyIconComponent} onClick={this.handleReplyClick} counter={status.get('replies_count')} />
+          <IconButton className='status__action-bar__button' title={replyTitle} icon={isReply ? 'reply' : replyIcon} iconComponent={isReply ? ReplyIcon : replyIconComponent} onClick={this.handleReplyClick} counter={repliesCount > 0 ? repliesCount : undefined} />
         </div>
         <div className='status__action-bar__button-wrapper'>
-          <BoostButton status={status} counters={withCounters} />
+          <BoostButton status={status} counters />
         </div>
         <div className='status__action-bar__button-wrapper'>
-          <IconButton className='status__action-bar__button star-icon' animate active={status.get('favourited')} title={favouriteTitle} icon='star' iconComponent={status.get('favourited') ? StarIcon : StarBorderIcon} onClick={this.handleFavouriteClick} counter={withCounters ? status.get('favourites_count') : undefined} />
+          <IconButton className='status__action-bar__button star-icon' animate active={status.get('favourited')} title={favouriteTitle} icon='star' iconComponent={status.get('favourited') ? StarIcon : StarBorderIcon} onClick={this.handleFavouriteClick} counter={visibleFavouritesCount > 0 ? visibleFavouritesCount : undefined} />
         </div>
         <div className='status__action-bar__button-wrapper'>
           <IconButton className='status__action-bar__button bookmark-icon' disabled={!signedIn} active={status.get('bookmarked')} title={bookmarkTitle} icon='bookmark' iconComponent={status.get('bookmarked') ? BookmarkIcon : BookmarkBorderIcon} onClick={this.handleBookmarkClick} />
