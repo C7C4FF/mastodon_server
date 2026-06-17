@@ -2490,6 +2490,41 @@ a .account__avatar {
   text-decoration: none;
 }
 
+.status__content {
+  .md-color {
+    color: inherit;
+  }
+
+  .md-bg {
+    border-radius: 3px;
+    box-decoration-break: clone;
+    padding: 0 0.15em;
+  }
+
+  .md-align-left,
+  .md-align-center,
+  .md-align-right {
+    display: block;
+  }
+
+  .md-align-left {
+    text-align: start;
+  }
+
+  .md-align-center {
+    text-align: center;
+  }
+
+  .md-align-right {
+    text-align: end;
+  }
+
+  .md-size-big {
+    font-size: 1.18em;
+    line-height: 1.35;
+  }
+}
+
 .status__display-name,
 .account__display-name {
   .display-name strong {

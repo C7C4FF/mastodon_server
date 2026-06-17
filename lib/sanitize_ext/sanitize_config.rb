@@ -32,9 +32,33 @@ class Sanitize
         next true if /^(mention|hashtag)$/.match?(e) # semantic classes
         next true if /^(ellipsis|invisible)$/.match?(e) # link formatting classes
         next true if e == 'quote-inline'
+        next true if /^md-(color|bg|align-left|align-center|align-right|size-big)$/.match?(e)
       end
 
       node['class'] = class_list.join(' ')
+    end
+
+    MARKDOWN_STYLE_TRANSFORMER = lambda do |env|
+      node = env[:node]
+
+      unless env[:node_name] == 'span'
+        node.remove_attribute('style')
+        next
+      end
+
+      style = node['style']
+      next if style.blank?
+
+      allowed_declarations = style.split(';').filter_map do |declaration|
+        match = declaration.match(/\A\s*(color|background-color):\s*(#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?)\s*\z/)
+        "#{match[1]}: #{match[2].downcase}" if match
+      end
+
+      if allowed_declarations.empty?
+        node.remove_attribute('style')
+      else
+        node['style'] = allowed_declarations.join('; ')
+      end
     end
 
     TRANSLATE_TRANSFORMER = lambda do |env|
@@ -112,7 +136,7 @@ class Sanitize
       attributes: {
         :all => %w(lang),
         'a' => %w(href rel class translate),
-        'span' => %w(class translate),
+        'span' => %w(class style translate),
         'ol' => %w(start reversed),
         'li' => %w(value),
         'p' => %w(class),
@@ -127,8 +151,14 @@ class Sanitize
 
       protocols: {},
 
+      css: {
+        properties: %w(color background-color),
+        protocols: [],
+      },
+
       transformers: [
         ALLOWED_CLASS_TRANSFORMER,
+        MARKDOWN_STYLE_TRANSFORMER,
         TRANSLATE_TRANSFORMER,
         MATH_TRANSFORMER,
         UNSUPPORTED_ELEMENTS_TRANSFORMER,

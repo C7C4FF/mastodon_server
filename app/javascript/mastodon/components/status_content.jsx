@@ -182,6 +182,30 @@ class StatusContent extends PureComponent {
     return undefined;
   }
 
+  handleAttribute = (name, value, tagName) => {
+    if (tagName !== 'span' || name !== 'style') {
+      return undefined;
+    }
+
+    const style = {};
+
+    for (const declaration of value.split(';')) {
+      const match = declaration.match(/^\s*(color|background-color):\s*(#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?)\s*$/);
+
+      if (!match) {
+        continue;
+      }
+
+      if (match[1] === 'color') {
+        style.color = match[2].toLowerCase();
+      } else {
+        style.backgroundColor = match[2].toLowerCase();
+      }
+    }
+
+    return Object.keys(style).length > 0 ? ['style', style] : null;
+  }
+
   render () {
     const { status, intl, statusContent } = this.props;
 
@@ -227,6 +251,7 @@ class StatusContent extends PureComponent {
               htmlString={content}
               extraEmojis={status.get('emojis')}
               onElement={this.handleElement}
+              onAttribute={this.handleAttribute}
             />
 
             {poll}
@@ -245,6 +270,7 @@ class StatusContent extends PureComponent {
             htmlString={content}
             extraEmojis={status.get('emojis')}
             onElement={this.handleElement}
+            onAttribute={this.handleAttribute}
           />
 
           {poll}
