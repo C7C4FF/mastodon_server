@@ -909,7 +909,7 @@
   "navigation_bar.blocks": "Blocked users",
   "navigation_bar.bookmarks": "Bookmarks",
   "navigation_bar.collections": "Collections",
-  "navigation_bar.direct": "Private mentions",
+  "navigation_bar.direct": "DM",
   "navigation_bar.domain_blocks": "Blocked domains",
   "navigation_bar.favourites": "Favorites",
   "navigation_bar.filters": "Muted words",
