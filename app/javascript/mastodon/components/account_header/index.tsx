@@ -131,7 +131,6 @@ export const AccountHeader: React.FC<{
               accountId={accountId}
               className={classes.buttonsDesktop}
               noShare={!isMe || 'share' in navigator}
-              forceMenu={'share' in navigator}
             />
           </div>
 

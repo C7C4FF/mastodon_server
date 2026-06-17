@@ -28,25 +28,53 @@
 
 // Wraps everything except the header image.
 .barWrapper {
+  --profile-avatar-size: 96px;
+  --profile-avatar-overlap: 48px;
+
+  position: relative;
+  padding-top: calc(
+    var(--profile-avatar-size) - var(--profile-avatar-overlap) + 8px
+  );
   padding-inline: 16px;
+
+  @container (width >= 500px) {
+    --profile-avatar-size: 136px;
+    --profile-avatar-overlap: 68px;
+  }
 }
 
 // Avatar
 .avatarWrapper {
-  margin-top: -64px;
-  padding-top: 0;
+  position: absolute;
+  inset-block-start: calc(-1 * var(--profile-avatar-overlap));
+  inset-inline-start: 16px;
+  width: var(--profile-avatar-size);
+  height: var(--profile-avatar-size);
+  margin: 0;
+  padding: 0;
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
-  overflow: hidden;
-  margin-inline-start: -2px; // aligns the pfp with content below
+  overflow: visible;
+
+  > a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+    box-sizing: border-box;
+    overflow: hidden;
+    background: var(--color-bg-primary);
+    border-radius: 9999px;
+  }
 }
 
 .avatar {
   background: var(--color-bg-primary);
-  border: 1px solid var(--color-border-primary);
-  border-radius: var(--avatar-border-radius);
+  border: 0;
+  border-radius: 9999px;
+  width: 100% !important;
+  height: 100% !important;
 
   .moved & {
     filter: grayscale(100%);
@@ -57,7 +85,7 @@
   display: flex;
   align-items: start;
   gap: 16px;
-  margin-top: 16px;
+  margin-top: 8px;
   margin-bottom: 16px;
 
   h1 {
@@ -218,6 +246,10 @@ $button-fallback-breakpoint: $button-breakpoint + 55px;
 }
 
 .buttonsDesktop {
+  position: absolute;
+  inset-block-start: 14px;
+  inset-inline-end: 16px;
+
   @container (width < #{$button-breakpoint}) {
     display: none;
   }
@@ -271,6 +303,61 @@ $button-fallback-breakpoint: $button-breakpoint + 55px;
 .numberFields {
   @container (width >= #{$button-breakpoint}) {
     --number-fields-gap: 40px;
+  }
+}
+
+.profileMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 12px;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.joinedDate {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover,
+  &:focus {
+    text-decoration: underline;
+  }
+}
+
+.followCounts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  a {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+  }
+
+  strong {
+    color: var(--color-text-primary);
+    font-weight: 700;
+  }
+
+  a:hover,
+  a:focus {
+    text-decoration: underline;
   }
 }
 

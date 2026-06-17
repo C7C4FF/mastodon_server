@@ -1,15 +1,16 @@
 import { useCallback, useMemo } from 'react';
 import type { FC } from 'react';
 
-import { FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage, FormattedNumber, useIntl } from 'react-intl';
+import { Link } from 'react-router-dom';
 
 import { openModal } from '@/mastodon/actions/modal';
 import { useAccount } from '@/mastodon/hooks/useAccount';
 import { useAppDispatch } from '@/mastodon/store';
+import CalendarIcon from '@/material-icons/400-24px/calendar_month.svg?react';
 
 import { FormattedDateWrapper } from '../formatted_date';
-import { NumberFields, NumberFieldsItem } from '../number_fields';
-import { ShortNumber } from '../short_number';
+import { Icon } from '../icon';
 
 import classes from './styles.module.scss';
 
@@ -35,41 +36,19 @@ export const AccountNumberFields: FC<{ accountId: string }> = ({
   }
 
   return (
-    <NumberFields className={classes.numberFields}>
-      <NumberFieldsItem
-        label={
-          <FormattedMessage id='account.followers' defaultMessage='Followers' />
-        }
-        hint={intl.formatNumber(account.followers_count)}
-        link={`/@${account.acct}/followers`}
+    <div className={classes.profileMeta}>
+      <button
+        type='button'
+        onClick={showJoinModal}
+        className={classes.joinedDate}
+        title={intl.formatDate(account.created_at)}
       >
-        <ShortNumber value={account.followers_count} />
-      </NumberFieldsItem>
-
-      <NumberFieldsItem
-        label={
-          <FormattedMessage id='account.following' defaultMessage='Following' />
-        }
-        hint={intl.formatNumber(account.following_count)}
-        link={`/@${account.acct}/following`}
-      >
-        <ShortNumber value={account.following_count} />
-      </NumberFieldsItem>
-
-      <NumberFieldsItem
-        label={<FormattedMessage id='account.posts' defaultMessage='Posts' />}
-        hint={intl.formatNumber(account.statuses_count)}
-      >
-        <ShortNumber value={account.statuses_count} />
-      </NumberFieldsItem>
-
-      <NumberFieldsItem
-        label={
-          <FormattedMessage id='account.joined_short' defaultMessage='Joined' />
-        }
-        hint={intl.formatDate(account.created_at)}
-      >
-        <button type='button' onClick={showJoinModal}>
+        <Icon id='calendar' icon={CalendarIcon} />
+        <FormattedMessage
+          id='account.joined_date_label'
+          defaultMessage='Joined:'
+        />{' '}
+        <span>
           {createdThisYear ? (
             <FormattedDateWrapper
               value={account.created_at}
@@ -79,8 +58,36 @@ export const AccountNumberFields: FC<{ accountId: string }> = ({
           ) : (
             <FormattedDateWrapper value={account.created_at} year='numeric' />
           )}
-        </button>
-      </NumberFieldsItem>
-    </NumberFields>
+        </span>
+      </button>
+
+      <div className={classes.followCounts}>
+        <Link
+          to={`/@${account.acct}/following`}
+          title={intl.formatNumber(account.following_count)}
+        >
+          <strong>
+            <FormattedNumber value={account.following_count} />
+          </strong>{' '}
+          <FormattedMessage
+            id='account.following_x'
+            defaultMessage='Following'
+          />
+        </Link>
+
+        <Link
+          to={`/@${account.acct}/followers`}
+          title={intl.formatNumber(account.followers_count)}
+        >
+          <strong>
+            <FormattedNumber value={account.followers_count} />
+          </strong>{' '}
+          <FormattedMessage
+            id='account.followers_x'
+            defaultMessage='Followers'
+          />
+        </Link>
+      </div>
+    </div>
   );
 };
