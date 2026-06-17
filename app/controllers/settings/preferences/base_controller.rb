@@ -19,6 +19,9 @@ class Settings::Preferences::BaseController < Settings::BaseController
   end
 
   def user_params
-    params.expect(user: [:locale, :time_zone, chosen_languages: [], settings_attributes: UserSettings.keys])
+    params.expect(user: [:time_zone, settings_attributes: UserSettings.keys]).tap do |permitted_params|
+      permitted_params[:settings_attributes]&.delete(:default_language)
+      permitted_params[:settings_attributes]&.delete('default_language')
+    end
   end
 end
