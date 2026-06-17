@@ -18,7 +18,6 @@ SimpleNavigation::Configuration.run do |navigation|
     n.item :preferences, safe_join([material_symbol('settings'), t('settings.preferences')]), settings_preferences_path, if: -> { current_user.functional? && !self_destruct } do |s|
       s.item :appearance, safe_join([material_symbol('computer'), t('settings.appearance')]), settings_preferences_appearance_path
       s.item :posting_defaults, safe_join([material_symbol('edit_square'), t('preferences.posting_defaults')]), settings_preferences_posting_defaults_path
-      s.item :notifications, safe_join([material_symbol('mail'), t('settings.notifications')]), settings_preferences_notifications_path
     end
 
     n.item :relationships, safe_join([material_symbol('groups'), t('settings.relationships')]), relationships_path, if: -> { current_user.functional? && !self_destruct } do |s|

@@ -72,7 +72,7 @@ module Mastodon
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "Central Time (US & Canada)"
+    config.time_zone = 'Seoul'
     # config.eager_load_paths << Rails.root.join("extras")
 
     # config.paths.add File.join('app', 'api'), glob: File.join('**', '*.rb')

@@ -41,6 +41,10 @@ const messages = defineMessages({
     id: 'navigation_bar.privacy_and_reach',
     defaultMessage: 'Privacy and reach',
   },
+  followRequests: {
+    id: 'column.follow_requests',
+    defaultMessage: 'Follow requests',
+  },
 });
 
 export const MoreLink: React.FC = () => {
@@ -50,6 +54,10 @@ export const MoreLink: React.FC = () => {
 
   const menu = useMemo(() => {
     const arr: MenuItem[] = [
+      {
+        to: '/follow_requests',
+        text: intl.formatMessage(messages.followRequests),
+      },
       {
         href: '/filters',
         text: intl.formatMessage(messages.filters),
