@@ -107,7 +107,7 @@ Rails.application.configure do
     if Rails.configuration.i18n.available_locales.include?(custom_default_locale)
       custom_default_locale
     else
-      :en
+      :ko
     end
   end
 end

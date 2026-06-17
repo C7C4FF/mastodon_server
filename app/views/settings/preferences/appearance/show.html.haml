@@ -6,15 +6,7 @@
 
 = simple_form_for current_user, url: settings_preferences_appearance_path, html: { id: :edit_user } do |f|
   .fields-row
-    .fields-group.fields-row__column.fields-row__column-6
-      = f.input :locale,
-                collection: ui_languages,
-                hint: false,
-                include_blank: false,
-                label_method: ->(locale) { native_locale_name(locale) },
-                selected: I18n.locale,
-                wrapper: :with_label
-    .fields-group.fields-row__column.fields-row__column-6
+    .fields-group.fields-row__column.fields-row__column-12
       = f.input :time_zone,
                 collection: time_zone_options,
                 hint: false,
@@ -61,11 +53,6 @@
                    label_method: ->(emoji_style) { I18n.t("emoji_styles.#{emoji_style}", default: emoji_style) },
                    wrapper: :with_label,
                    required: false
-
-  - unless I18n.locale == :en
-    .flash-message.translation-prompt
-      = t 'appearance.localization.body'
-      = link_to t('appearance.localization.guide_link_text'), t('appearance.localization.guide_link'), target: '_blank', rel: 'noopener'
 
   = f.simple_fields_for :settings, current_user.settings do |ff|
     %h2= t 'appearance.animations_and_accessibility'
