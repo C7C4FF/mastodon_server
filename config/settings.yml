@@ -10,23 +10,23 @@ defaults: &defaults
   site_contact_username: ''
   site_contact_email: ''
   registrations_mode: 'none'
-  profile_directory: true
+  profile_directory: false
   closed_registrations_message: ''
-  local_live_feed_access: 'public'
-  remote_live_feed_access: 'public'
-  local_topic_feed_access: 'public'
-  remote_topic_feed_access: 'public'
+  local_live_feed_access: 'authenticated'
+  remote_live_feed_access: 'disabled'
+  local_topic_feed_access: 'authenticated'
+  remote_topic_feed_access: 'disabled'
   show_staff_badge: true
   preview_sensitive_media: false
-  noindex: false
+  noindex: true
   theme: 'mastodon-bird-ui'
   thumbnail_description: ''
-  trends: true
+  trends: false
   trendable_by_default: false
   disallowed_hashtags: # space separated string or list of hashtags without the hash
   bootstrap_timeline_accounts: ''
-  activity_api_enabled: true
-  peers_api_enabled: true
+  activity_api_enabled: false
+  peers_api_enabled: false
   show_domain_blocks: 'disabled'
   show_domain_blocks_rationale: 'disabled'
   require_invite_text: false
