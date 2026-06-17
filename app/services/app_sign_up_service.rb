@@ -41,7 +41,9 @@ class AppSignUpService < BaseService
   end
 
   def user_params
-    @params.slice(:email, :password, :agreement, :locale, :time_zone, :invite_code, :date_of_birth)
+    @params.slice(:email, :password, :agreement, :locale, :time_zone, :invite_code, :date_of_birth).tap do |params|
+      params[:time_zone] = Time.zone.tzinfo.name if params[:time_zone].blank?
+    end
   end
 
   def account_params
