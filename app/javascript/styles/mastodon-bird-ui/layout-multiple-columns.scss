@@ -3787,6 +3787,44 @@ body .compose-form .compose-form__uploads {
   width: 30px !important;
 }
 
+.layout-multiple-columns .status__action-bar .icon-button.icon-button--with-counter {
+  justify-content: center;
+  min-width: 0 !important;
+  overflow: visible;
+  width: unset !important;
+}
+
+.layout-multiple-columns .status__action-bar .icon-button__counter {
+  color: currentColor;
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-smaller);
+  font-weight: 600;
+  line-height: 1;
+  min-width: 0.75em;
+  white-space: nowrap;
+  position: relative;
+  z-index: 1;
+}
+
+.layout-multiple-columns .status__action-bar .icon-button__counter .animated-number {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  overflow: visible;
+  vertical-align: middle;
+}
+
+.layout-multiple-columns .status__action-bar .icon-button__counter .animated-number > span {
+  display: inline-flex;
+  align-items: center;
+}
+
+.layout-multiple-columns .status__action-bar__button-wrapper {
+  align-items: center;
+  display: inline-flex;
+}
+
 @media screen and (width >= 890px) {
   .layout-multiple-columns .status__action-bar .icon-button {
     position: relative;
@@ -4724,6 +4762,10 @@ div[tabindex='-1']
   left: -3px;
 }
 
+.layout-multiple-columns .status__action-bar .icon-button.icon-button--with-counter.star-icon::after {
+  transform: translateX(-3px) translateY(2px);
+}
+
 /* Disable default Mastodon animation: spring-rotate-in 1s linear; */
 .layout-multiple-columns.no-reduce-motion .icon-button.star-icon .icon-star {
   animation: none !important;
@@ -4793,7 +4835,7 @@ div[tabindex='-1']
 .layout-multiple-columns.no-reduce-motion
   .star-icon.icon-button--with-counter.activate
   .icon-button__counter {
-  margin-left: 20px;
+  margin-left: 0;
 }
 
 .animated-number {
@@ -5529,4 +5571,23 @@ div[tabindex='-1']
   .column-settings__hashtags
   .column-select__multi-value {
   background-color: var(--color-bg-75);
+}
+
+.layout-multiple-columns.no-reduce-motion
+  .status__action-bar
+  .icon-button.icon-button--with-counter.star-icon,
+.layout-multiple-columns
+  .status__action-bar
+  .icon-button.icon-button--with-counter {
+  max-width: none !important;
+  min-width: 45.78px !important;
+  overflow: visible !important;
+  width: auto !important;
+}
+
+.layout-multiple-columns.no-reduce-motion
+  .status__action-bar
+  .star-icon.icon-button--with-counter
+  .icon-button__counter {
+  margin-left: 0 !important;
 }

@@ -3950,9 +3950,49 @@ body .compose-form .compose-form__uploads {
 }
 
 /* Fix reply button not starting from the beginning */
-.layout-single-column .status__action-bar .icon-button:nth-of-type(1) {
+.layout-single-column
+  .status__action-bar
+  .icon-button:nth-of-type(1):not(.icon-button--with-counter) {
   min-width: 42.22px !important;
   width: 42.22px !important;
+}
+
+.layout-single-column .status__action-bar .icon-button.icon-button--with-counter {
+  justify-content: center;
+  min-width: 0 !important;
+  overflow: visible;
+  width: unset !important;
+}
+
+.layout-single-column .status__action-bar .icon-button__counter {
+  color: currentColor;
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-smaller);
+  font-weight: 600;
+  line-height: 1;
+  min-width: 0.75em;
+  white-space: nowrap;
+  position: relative;
+  z-index: 1;
+}
+
+.layout-single-column .status__action-bar .icon-button__counter .animated-number {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  overflow: visible;
+  vertical-align: middle;
+}
+
+.layout-single-column .status__action-bar .icon-button__counter .animated-number > span {
+  display: inline-flex;
+  align-items: center;
+}
+
+.layout-single-column .status__action-bar__button-wrapper {
+  align-items: center;
+  display: inline-flex;
 }
 
 .layout-single-column .status__action-bar .icon-button:nth-of-type(1)::after {
@@ -4163,12 +4203,18 @@ body .compose-form .compose-form__uploads {
     order: 18;
   }
 
-  .layout-single-column .status__action-bar .icon-button {
+  .layout-single-column .status__action-bar .icon-button:not(.icon-button--with-counter) {
     height: 24px !important;
     position: relative;
 
     /* It's inlined so we have to use !important */
     width: 50px !important;
+  }
+
+  .layout-single-column .status__action-bar .icon-button.icon-button--with-counter {
+    height: 24px !important;
+    min-width: 45.78px !important;
+    width: unset !important;
   }
 
   .layout-single-column .conversation .status__action-bar .icon-button {
@@ -5210,6 +5256,10 @@ div[tabindex='-1']
   left: -3px;
 }
 
+.layout-single-column .status__action-bar .icon-button.icon-button--with-counter.star-icon::after {
+  transform: translateX(-2px) translateY(2px);
+}
+
 /* Disable default Mastodon animation: spring-rotate-in 1s linear; */
 .layout-single-column.no-reduce-motion .icon-button.star-icon .icon-star {
   animation: none !important;
@@ -5285,7 +5335,7 @@ div[tabindex='-1']
 .layout-single-column.no-reduce-motion
   .star-icon.icon-button--with-counter
   .icon-button__counter {
-  margin-left: 20px;
+  margin-left: 0;
 }
 
 .animated-number {
@@ -6087,3 +6137,22 @@ body.layout-single-column.scroll-down .tabs-bar__portal {
 }
 
 2/2: If you prefer stars remove this line too */
+
+.layout-single-column.no-reduce-motion
+  .status__action-bar
+  .icon-button.icon-button--with-counter.star-icon,
+.layout-single-column
+  .status__action-bar
+  .icon-button.icon-button--with-counter {
+  max-width: none !important;
+  min-width: 45.78px !important;
+  overflow: visible !important;
+  width: auto !important;
+}
+
+.layout-single-column.no-reduce-motion
+  .status__action-bar
+  .star-icon.icon-button--with-counter
+  .icon-button__counter {
+  margin-left: 0 !important;
+}
