@@ -5,31 +5,20 @@ import { defineMessages, useIntl } from 'react-intl';
 import classNames from 'classnames';
 import { Link, useLocation } from 'react-router-dom';
 
-import type { Map as ImmutableMap } from 'immutable';
-
 import { animated, useSpring } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
 
-import { useAccount } from '@/mastodon/hooks/useAccount';
 import AddIcon from '@/material-icons/400-24px/add.svg?react';
 import AlternateEmailIcon from '@/material-icons/400-24px/alternate_email.svg?react';
 import BookmarksActiveIcon from '@/material-icons/400-24px/bookmarks-fill.svg?react';
 import BookmarksIcon from '@/material-icons/400-24px/bookmarks.svg?react';
-import CollectionsActiveIcon from '@/material-icons/400-24px/category-fill.svg?react';
-import CollectionsIcon from '@/material-icons/400-24px/category.svg?react';
 import HomeActiveIcon from '@/material-icons/400-24px/home-fill.svg?react';
 import HomeIcon from '@/material-icons/400-24px/home.svg?react';
-import InfoIcon from '@/material-icons/400-24px/info.svg?react';
 import NotificationsActiveIcon from '@/material-icons/400-24px/notifications-fill.svg?react';
 import NotificationsIcon from '@/material-icons/400-24px/notifications.svg?react';
-import PersonAddActiveIcon from '@/material-icons/400-24px/person_add-fill.svg?react';
-import PersonAddIcon from '@/material-icons/400-24px/person_add.svg?react';
-import PublicIcon from '@/material-icons/400-24px/public.svg?react';
 import SettingsIcon from '@/material-icons/400-24px/settings.svg?react';
 import StarActiveIcon from '@/material-icons/400-24px/star-fill.svg?react';
 import StarIcon from '@/material-icons/400-24px/star.svg?react';
-import TrendingUpIcon from '@/material-icons/400-24px/trending_up.svg?react';
-import { fetchFollowRequests } from 'mastodon/actions/accounts';
 import { openNavigation, closeNavigation } from 'mastodon/actions/navigation';
 import { Account } from 'mastodon/components/account';
 import { IconWithBadge } from 'mastodon/components/icon_with_badge';
@@ -39,25 +28,14 @@ import { ColumnLink } from 'mastodon/features/ui/components/column_link';
 import { getNavigationSkipLinkId } from 'mastodon/features/ui/components/skip_links';
 import { useBreakpoint } from 'mastodon/features/ui/hooks/useBreakpoint';
 import { useIdentity } from 'mastodon/identity_context';
-import {
-  localLiveFeedAccess,
-  remoteLiveFeedAccess,
-  trendsEnabled,
-  me,
-} from 'mastodon/initial_state';
+import { me } from 'mastodon/initial_state';
 import { transientSingleColumn } from 'mastodon/is_mobile';
-import { canViewFeed } from 'mastodon/permissions';
 import { selectUnreadNotificationGroupsCount } from 'mastodon/selectors/notifications';
 import { useAppSelector, useAppDispatch } from 'mastodon/store';
 
-import { AnnualReportNavItem } from '../annual_report/nav_item';
-
 import { DisabledAccountBanner } from './components/disabled_account_banner';
-import { FollowedTagsPanel } from './components/followed_tags_panel';
-import { ListPanel } from './components/list_panel';
 import { MoreLink } from './components/more_link';
 import { SignInBanner } from './components/sign_in_banner';
-import { Trends } from './components/trends';
 
 const messages = defineMessages({
   home: { id: 'tabs_bar.home', defaultMessage: 'Home' },
@@ -65,38 +43,18 @@ const messages = defineMessages({
     id: 'tabs_bar.notifications',
     defaultMessage: 'Notifications',
   },
-  explore: { id: 'explore.title', defaultMessage: 'Trending' },
-  firehose: { id: 'column.firehose', defaultMessage: 'Live feeds' },
-  firehose_singular: {
-    id: 'column.firehose_singular',
-    defaultMessage: 'Live feed',
-  },
   main: {
     id: 'navigation_bar.main',
     defaultMessage: 'Main',
     description:
       'Label for the main navigation; should not contain the word "navigation".',
   },
-  direct: { id: 'navigation_bar.direct', defaultMessage: 'Private mentions' },
+  direct: { id: 'navigation_bar.direct', defaultMessage: 'DM' },
   favourites: { id: 'navigation_bar.favourites', defaultMessage: 'Favorites' },
   bookmarks: { id: 'navigation_bar.bookmarks', defaultMessage: 'Bookmarks' },
-  collections: {
-    id: 'navigation_bar.collections',
-    defaultMessage: 'Collections',
-  },
   preferences: {
     id: 'navigation_bar.preferences',
     defaultMessage: 'Preferences',
-  },
-  followsAndFollowers: {
-    id: 'navigation_bar.follows_and_followers',
-    defaultMessage: 'Follows and followers',
-  },
-  about: { id: 'navigation_bar.about', defaultMessage: 'About' },
-  search: { id: 'navigation_bar.search', defaultMessage: 'Search' },
-  searchTrends: {
-    id: 'navigation_bar.search_trends',
-    defaultMessage: 'Search / Trending',
   },
   advancedInterface: {
     id: 'navigation_bar.advanced_interface',
@@ -107,11 +65,6 @@ const messages = defineMessages({
     defaultMessage:
       'Posts, accounts, and other specific pages are opened by default in the classic web interface.',
   },
-  followRequests: {
-    id: 'navigation_bar.follow_requests',
-    defaultMessage: 'Follow requests',
-  },
-  logout: { id: 'navigation_bar.logout', defaultMessage: 'Logout' },
   compose: { id: 'tabs_bar.publish', defaultMessage: 'New Post' },
 });
 
@@ -145,51 +98,6 @@ const NotificationsLink = () => {
   );
 };
 
-const FollowRequestsLink: React.FC = () => {
-  const intl = useIntl();
-  const count = useAppSelector(
-    (state) =>
-      (
-        state.user_lists.getIn(['follow_requests', 'items']) as
-          | ImmutableMap<string, unknown>
-          | undefined
-      )?.size ?? 0,
-  );
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    dispatch(fetchFollowRequests());
-  }, [dispatch]);
-
-  if (count === 0) {
-    return null;
-  }
-
-  return (
-    <ColumnLink
-      transparent
-      to='/follow_requests'
-      icon={
-        <IconWithBadge
-          id='user-plus'
-          icon={PersonAddIcon}
-          count={count}
-          className='column-link__icon'
-        />
-      }
-      activeIcon={
-        <IconWithBadge
-          id='user-plus'
-          icon={PersonAddActiveIcon}
-          count={count}
-          className='column-link__icon'
-        />
-      }
-      text={intl.formatMessage(messages.followRequests)}
-    />
-  );
-};
-
 const ProfileCard: React.FC = () => {
   if (!me) {
     return null;
@@ -202,23 +110,15 @@ const ProfileCard: React.FC = () => {
   );
 };
 
-const isFirehoseActive = (
-  match: unknown,
-  { pathname }: { pathname: string },
-) => {
-  return !!match || pathname.startsWith('/public');
-};
-
 const MENU_WIDTH = 284;
 
 export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
   multiColumn = false,
 }) => {
   const intl = useIntl();
-  const { signedIn, permissions, disabledAccountId } = useIdentity();
+  const { signedIn, disabledAccountId } = useIdentity();
   const location = useLocation();
   const showSearch = useBreakpoint('full') && !multiColumn;
-  const account = useAccount(me);
 
   let banner: React.ReactNode;
 
@@ -285,60 +185,11 @@ export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
           </>
         )}
 
-        {trendsEnabled && (
-          <li>
-            <ColumnLink
-              transparent
-              to='/explore'
-              icon='explore'
-              iconComponent={TrendingUpIcon}
-              text={intl.formatMessage(messages.explore)}
-            />
-          </li>
-        )}
-
-        {(canViewFeed(signedIn, permissions, localLiveFeedAccess) ||
-          canViewFeed(signedIn, permissions, remoteLiveFeedAccess)) && (
-          <li>
-            <ColumnLink
-              transparent
-              to={
-                canViewFeed(signedIn, permissions, localLiveFeedAccess)
-                  ? '/public/local'
-                  : '/public/remote'
-              }
-              icon='globe'
-              iconComponent={PublicIcon}
-              isActive={isFirehoseActive}
-              text={intl.formatMessage(
-                canViewFeed(signedIn, permissions, localLiveFeedAccess) &&
-                  canViewFeed(signedIn, permissions, remoteLiveFeedAccess)
-                  ? messages.firehose
-                  : messages.firehose_singular,
-              )}
-            />
-          </li>
-        )}
-
         {signedIn && (
           <>
             <li>
               <NotificationsLink />
             </li>
-
-            <li>
-              <FollowRequestsLink />
-            </li>
-
-            <li>
-              <AnnualReportNavItem />
-            </li>
-
-            <li role='separator' />
-
-            <ListPanel />
-
-            <FollowedTagsPanel />
 
             <li>
               <ColumnLink
@@ -350,6 +201,7 @@ export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
                 text={intl.formatMessage(messages.favourites)}
               />
             </li>
+
             <li>
               <ColumnLink
                 transparent
@@ -360,16 +212,7 @@ export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
                 text={intl.formatMessage(messages.bookmarks)}
               />
             </li>
-            <li>
-              <ColumnLink
-                transparent
-                to={`/@${account?.acct}/collections`}
-                icon='collections'
-                iconComponent={CollectionsIcon}
-                activeIconComponent={CollectionsActiveIcon}
-                text={intl.formatMessage(messages.collections)}
-              />
-            </li>
+
             <li>
               <ColumnLink
                 transparent
@@ -398,16 +241,6 @@ export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
           </>
         )}
 
-        <li className='navigation-panel__legal'>
-          <ColumnLink
-            transparent
-            to='/about'
-            icon='ellipsis-h'
-            iconComponent={InfoIcon}
-            text={intl.formatMessage(messages.about)}
-          />
-        </li>
-
         {!signedIn && (
           <li className='navigation-panel__sign-in-banner'>
             <hr />
@@ -418,8 +251,6 @@ export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
       </ul>
 
       <div className='flex-spacer' />
-
-      <Trends />
     </nav>
   );
 };

@@ -11,7 +11,6 @@ import HomeIcon from '@/material-icons/400-24px/home.svg?react';
 import MenuIcon from '@/material-icons/400-24px/menu.svg?react';
 import NotificationsActiveIcon from '@/material-icons/400-24px/notifications-fill.svg?react';
 import NotificationsIcon from '@/material-icons/400-24px/notifications.svg?react';
-import SearchIcon from '@/material-icons/400-24px/search.svg?react';
 import { openModal } from 'mastodon/actions/modal';
 import { toggleNavigation } from 'mastodon/actions/navigation';
 import { fetchServer } from 'mastodon/actions/server';
@@ -25,7 +24,6 @@ import { useAppDispatch, useAppSelector } from 'mastodon/store';
 
 export const messages = defineMessages({
   home: { id: 'tabs_bar.home', defaultMessage: 'Home' },
-  search: { id: 'tabs_bar.search', defaultMessage: 'Search' },
   publish: { id: 'tabs_bar.publish', defaultMessage: 'New Post' },
   notifications: {
     id: 'tabs_bar.notifications',
@@ -184,11 +182,6 @@ export const NavigationBar: React.FC = () => {
               to='/home'
               icon={<Icon id='' icon={HomeIcon} />}
               activeIcon={<Icon id='' icon={HomeActiveIcon} />}
-            />
-            <IconLabelButton
-              title={intl.formatMessage(messages.search)}
-              to='/explore'
-              icon={<Icon id='' icon={SearchIcon} />}
             />
             <IconLabelButton
               title={intl.formatMessage(messages.publish)}

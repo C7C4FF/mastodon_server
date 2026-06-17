@@ -1,0 +1,30 @@
+.navigation-panel .navigation-panel__menu,
+.layout-single-column .navigation-panel .navigation-panel__menu,
+.layout-multiple-columns .navigation-panel .navigation-panel__menu {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.navigation-panel .navigation-panel__menu > li,
+.layout-single-column .navigation-panel .navigation-panel__menu > li,
+.layout-multiple-columns .navigation-panel .navigation-panel__menu > li {
+  display: block;
+  width: 100%;
+}
+
+.navigation-panel .navigation-panel__menu > li[role='separator'],
+.layout-single-column .navigation-panel .navigation-panel__menu > li[role='separator'],
+.layout-multiple-columns .navigation-panel .navigation-panel__menu > li[role='separator'] {
+  width: 100%;
+}
+
+.navigation-panel .navigation-panel__menu .column-link,
+.layout-single-column .navigation-panel .navigation-panel__menu .column-link,
+.layout-multiple-columns .navigation-panel .navigation-panel__menu .column-link {
+  box-sizing: border-box;
+  justify-content: flex-start;
+  width: 100%;
+}
