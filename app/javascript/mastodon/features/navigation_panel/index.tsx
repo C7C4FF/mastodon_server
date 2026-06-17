@@ -16,6 +16,7 @@ import HomeActiveIcon from '@/material-icons/400-24px/home-fill.svg?react';
 import HomeIcon from '@/material-icons/400-24px/home.svg?react';
 import NotificationsActiveIcon from '@/material-icons/400-24px/notifications-fill.svg?react';
 import NotificationsIcon from '@/material-icons/400-24px/notifications.svg?react';
+import PersonAddIcon from '@/material-icons/400-24px/person_add.svg?react';
 import PublicIcon from '@/material-icons/400-24px/public.svg?react';
 import SettingsIcon from '@/material-icons/400-24px/settings.svg?react';
 import StarActiveIcon from '@/material-icons/400-24px/star-fill.svg?react';
@@ -57,6 +58,10 @@ const messages = defineMessages({
   direct: { id: 'navigation_bar.direct', defaultMessage: 'DM' },
   favourites: { id: 'navigation_bar.favourites', defaultMessage: 'Favorites' },
   bookmarks: { id: 'navigation_bar.bookmarks', defaultMessage: 'Bookmarks' },
+  followRequests: {
+    id: 'column.follow_requests',
+    defaultMessage: 'Follow requests',
+  },
   preferences: {
     id: 'navigation_bar.preferences',
     defaultMessage: 'Preferences',
@@ -235,6 +240,17 @@ export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
                 icon='at'
                 iconComponent={AlternateEmailIcon}
                 text={intl.formatMessage(messages.direct)}
+              />
+            </li>
+
+            <li>
+              <ColumnLink
+                transparent
+                to='/follow_requests'
+                icon='user-plus'
+                iconComponent={PersonAddIcon}
+                activeIconComponent={PersonAddIcon}
+                text={intl.formatMessage(messages.followRequests)}
               />
             </li>
 
