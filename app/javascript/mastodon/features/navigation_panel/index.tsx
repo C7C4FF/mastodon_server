@@ -16,6 +16,7 @@ import HomeActiveIcon from '@/material-icons/400-24px/home-fill.svg?react';
 import HomeIcon from '@/material-icons/400-24px/home.svg?react';
 import NotificationsActiveIcon from '@/material-icons/400-24px/notifications-fill.svg?react';
 import NotificationsIcon from '@/material-icons/400-24px/notifications.svg?react';
+import PublicIcon from '@/material-icons/400-24px/public.svg?react';
 import SettingsIcon from '@/material-icons/400-24px/settings.svg?react';
 import StarActiveIcon from '@/material-icons/400-24px/star-fill.svg?react';
 import StarIcon from '@/material-icons/400-24px/star.svg?react';
@@ -48,6 +49,10 @@ const messages = defineMessages({
     defaultMessage: 'Main',
     description:
       'Label for the main navigation; should not contain the word "navigation".',
+  },
+  localTimeline: {
+    id: 'navigation_bar.live_feed_local',
+    defaultMessage: 'Local timeline',
   },
   direct: { id: 'navigation_bar.direct', defaultMessage: 'DM' },
   favourites: { id: 'navigation_bar.favourites', defaultMessage: 'Favorites' },
@@ -180,6 +185,16 @@ export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
                 iconComponent={HomeIcon}
                 activeIconComponent={HomeActiveIcon}
                 text={intl.formatMessage(messages.home)}
+              />
+            </li>
+            <li>
+              <ColumnLink
+                transparent
+                to='/public/local'
+                icon='globe'
+                iconComponent={PublicIcon}
+                activeIconComponent={PublicIcon}
+                text={intl.formatMessage(messages.localTimeline)}
               />
             </li>
           </>
