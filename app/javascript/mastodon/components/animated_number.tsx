@@ -6,6 +6,8 @@ import { reduceMotion } from '../initial_state';
 
 import { ShortNumber } from './short_number';
 
+export const ANIMATED_NUMBER_DURATION = 200;
+
 interface Props {
   value: number;
   hideZero?: boolean;
@@ -23,28 +25,44 @@ export const AnimatedNumber: React.FC<Props> = ({
   );
   const direction = value > previousValue ? -1 : 1;
   const isAnimating = value !== previousValue;
+  const hasInitialAnimation =
+    typeof initialPreviousValue !== 'undefined' &&
+    initialPreviousValue !== value &&
+    previousValue === initialPreviousValue;
   const shouldHideValue = hideZero && value === 0;
   const shouldHidePreviousValue = hidePreviousZero && previousValue === 0;
 
   const [styles, api] = useSpring(() => ({
-    transform: 'translateY(0%)',
-    config: { ...config.gentle, duration: 200 },
+    transform: hasInitialAnimation
+      ? `translateY(${100 * direction}%)`
+      : 'translateY(0%)',
+    config: { ...config.gentle, duration: ANIMATED_NUMBER_DURATION },
     immediate: true,
   }));
 
   useLayoutEffect(() => {
-    if (value !== previousValue) {
-      void api.start({
-        from: { transform: `translateY(${100 * direction}%)` },
-        to: { transform: 'translateY(0%)' },
-        reset: true,
-        immediate: false,
-        onRest() {
-          setPreviousValue(value);
-        },
-      });
+    if (!isAnimating) {
+      return undefined;
     }
-  }, [api, direction, previousValue, value]);
+
+    void api.start({
+      from: { transform: `translateY(${100 * direction}%)` },
+      to: { transform: 'translateY(0%)' },
+      reset: true,
+      immediate: false,
+      onRest() {
+        setPreviousValue(value);
+      },
+    });
+
+    const timeout = window.setTimeout(() => {
+      setPreviousValue(value);
+    }, ANIMATED_NUMBER_DURATION + 50);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [api, direction, isAnimating, value]);
 
   if (reduceMotion || !isAnimating) {
     return shouldHideValue ? null : <ShortNumber value={value} />;

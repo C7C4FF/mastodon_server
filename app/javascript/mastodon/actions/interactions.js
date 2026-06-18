@@ -59,7 +59,7 @@ export function favourite(status) {
 
     api().post(`/api/v1/statuses/${status.get('id')}/favourite`).then(function (response) {
       dispatch(importFetchedStatus(response.data));
-      dispatch(favouriteSuccess(status));
+      dispatch(favouriteSuccess(status, response.data));
     }).catch(function (error) {
       dispatch(favouriteFail(status, error));
     });
@@ -72,7 +72,7 @@ export function unfavourite(status) {
 
     api().post(`/api/v1/statuses/${status.get('id')}/unfavourite`).then(response => {
       dispatch(importFetchedStatus(response.data));
-      dispatch(unfavouriteSuccess(status));
+      dispatch(unfavouriteSuccess(status, response.data));
     }).catch(error => {
       dispatch(unfavouriteFail(status, error));
     });
@@ -87,10 +87,11 @@ export function favouriteRequest(status) {
   };
 }
 
-export function favouriteSuccess(status) {
+export function favouriteSuccess(status, response) {
   return {
     type: FAVOURITE_SUCCESS,
     status: status,
+    response: response,
     skipLoading: true,
   };
 }
@@ -112,10 +113,11 @@ export function unfavouriteRequest(status) {
   };
 }
 
-export function unfavouriteSuccess(status) {
+export function unfavouriteSuccess(status, response) {
   return {
     type: UNFAVOURITE_SUCCESS,
     status: status,
+    response: response,
     skipLoading: true,
   };
 }

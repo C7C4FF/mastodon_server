@@ -7,6 +7,7 @@ import { requestNotificationPermission } from '../utils/notifications';
 import { fetchFollowRequests } from './accounts';
 import {
   importFetchedAccount,
+  importFetchedStatus,
 } from './importer';
 import { submitMarkers } from './markers';
 import { notificationsUpdate } from "./notifications_typed";
@@ -51,6 +52,9 @@ export function updateNotifications(notification, intlMessages, intlLocale) {
 
     // `notificationsUpdate` is still used in `user_lists` and `relationships` reducers
     dispatch(importFetchedAccount(notification.account));
+    if (notification.status) {
+      dispatch(importFetchedStatus(notification.status));
+    }
     dispatch(notificationsUpdate({ notification, playSound: playSound && !filtered}));
 
     // Desktop notifications

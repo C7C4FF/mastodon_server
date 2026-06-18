@@ -4,7 +4,10 @@ import classNames from 'classnames';
 
 import { usePrevious } from '../hooks/usePrevious';
 
-import { AnimatedNumber } from './animated_number';
+import {
+  ANIMATED_NUMBER_DURATION,
+  AnimatedNumber,
+} from './animated_number';
 import type { IconProp } from './icon';
 import { Icon } from './icon';
 
@@ -98,31 +101,37 @@ export const IconButton = forwardRef<HTMLButtonElement, Props>(
     const previousActive = usePrevious(active) ?? active;
     const shouldAnimate = animate && active !== previousActive;
     const [
-      { currentCounter, exitingCounter, enteringCounter },
+      { currentCounter, exitingCounter, enteringCounter, counterAnimationFrom },
       setCounterState,
     ] = useState<{
       currentCounter: number | undefined;
       exitingCounter: number | undefined;
       enteringCounter: boolean;
+      counterAnimationFrom: number | undefined;
     }>(() => ({
       currentCounter: counter,
       exitingCounter: undefined,
       enteringCounter: false,
+      counterAnimationFrom: undefined,
     }));
 
     let counterLeaving = exitingCounter;
     let counterEntering = enteringCounter;
+    let counterFrom = counterAnimationFrom;
 
     if (counter !== currentCounter) {
       counterEntering =
         typeof currentCounter === 'undefined' && typeof counter !== 'undefined';
       counterLeaving =
         typeof counter === 'undefined' ? currentCounter : undefined;
+      counterFrom =
+        typeof counter === 'undefined' ? currentCounter : currentCounter ?? 0;
 
       setCounterState({
         currentCounter: counter,
         exitingCounter: counterLeaving,
         enteringCounter: counterEntering,
+        counterAnimationFrom: counterFrom,
       });
     }
 
@@ -146,12 +155,13 @@ export const IconButton = forwardRef<HTMLButtonElement, Props>(
               ...state,
               exitingCounter: undefined,
               enteringCounter: false,
+              counterAnimationFrom: undefined,
             };
           }
 
           return state;
         });
-      }, 250);
+      }, ANIMATED_NUMBER_DURATION);
 
       return () => {
         window.clearTimeout(timeout);
@@ -180,7 +190,7 @@ export const IconButton = forwardRef<HTMLButtonElement, Props>(
               value={counter ?? 0}
               hideZero={isCounterExiting}
               hidePreviousZero={counterEntering}
-              initialPreviousValue={counterEntering ? 0 : undefined}
+              initialPreviousValue={counterFrom}
             />
           </span>
         ) : reserveCounterSpace ? (
