@@ -2735,6 +2735,7 @@ a.account__display-name {
 
 .account-switcher {
   margin-inline-start: auto;
+  position: relative;
 
   .icon {
     width: 20px;
@@ -2758,8 +2759,41 @@ a.account__display-name {
   height: 32px !important;
 }
 
+.account-switcher__dropdown {
+  position: absolute;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: 0;
+  z-index: 10000;
+
+  .dropdown-menu {
+    min-width: 292px;
+  }
+}
+
 .account-switcher__menu-item button {
   min-width: 240px;
+}
+
+.account-switcher__menu-item--account button {
+  min-width: 0;
+}
+
+.account-switcher__account-row {
+  display: flex;
+  align-items: stretch;
+  min-width: 292px;
+}
+
+.account-switcher__account-row .account-switcher__account-button {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.account-switcher__account-row .account-switcher__remove-button {
+  flex: 0 0 42px;
+  justify-content: center;
+  min-width: 0;
+  padding-inline: 10px;
 }
 
 .account-switcher__menu-item .account__avatar {
