@@ -6,7 +6,6 @@ import AddIcon from '@/material-icons/400-24px/add.svg?react';
 import CheckIcon from '@/material-icons/400-24px/check.svg?react';
 import LogoutIcon from '@/material-icons/400-24px/logout.svg?react';
 import MoreHorizIcon from '@/material-icons/400-24px/more_horiz.svg?react';
-import { openModal } from 'mastodon/actions/modal';
 import api from 'mastodon/api';
 import type { ApiAccountJSON } from 'mastodon/api_types/accounts';
 import { Avatar } from 'mastodon/components/avatar';
@@ -14,7 +13,6 @@ import { Dropdown } from 'mastodon/components/dropdown_menu';
 import { Icon } from 'mastodon/components/icon';
 import type { RenderItemFn } from 'mastodon/components/dropdown_menu';
 import type { ActionMenuItem } from 'mastodon/models/dropdown_menu';
-import { useAppDispatch } from 'mastodon/store';
 
 const messages = defineMessages({
   title: {
@@ -102,11 +100,11 @@ const renderMenuItem: RenderItemFn<AccountSwitcherMenuItem> = (
 
 export const AccountSwitcher: React.FC = () => {
   const intl = useIntl();
-  const dispatch = useAppDispatch();
   const [state, setState] = useState<AccountSwitcherState | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingAccountId, setLoadingAccountId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const loadAccounts = useCallback(() => {
     setLoading(true);
@@ -157,8 +155,17 @@ export const AccountSwitcher: React.FC = () => {
   }, []);
 
   const handleLogout = useCallback(() => {
-    dispatch(openModal({ modalType: 'CONFIRM_LOG_OUT', modalProps: {} }));
-  }, [dispatch]);
+    setLoggingOut(true);
+
+    void api(false)
+      .post<RedirectResponse>('/auth/account_switcher/logout.json')
+      .then(({ data }) => {
+        window.location.assign(data.redirect_to);
+      })
+      .catch(() => {
+        setLoggingOut(false);
+      });
+  }, []);
 
   const items: AccountSwitcherMenuItem[] = [
     ...(state?.accounts ?? []).map((account) => {
@@ -172,7 +179,7 @@ export const AccountSwitcher: React.FC = () => {
           handleSwitch(account.id);
         },
         account,
-        disabled: current || loadingAccountId !== null || adding,
+        disabled: current || loadingAccountId !== null || adding || loggingOut,
         highlighted: current,
       };
     }),
@@ -182,14 +189,14 @@ export const AccountSwitcher: React.FC = () => {
       action: handleAdd,
       icon: AddIcon,
       iconId: 'plus',
-      disabled: loadingAccountId !== null || adding,
+      disabled: loadingAccountId !== null || adding || loggingOut,
     },
     {
       text: intl.formatMessage(messages.logout),
       action: handleLogout,
       icon: LogoutIcon,
       iconId: 'sign-out',
-      disabled: loadingAccountId !== null || adding,
+      disabled: loadingAccountId !== null || adding || loggingOut,
     },
   ];
 
