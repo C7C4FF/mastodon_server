@@ -2724,6 +2724,43 @@ a.account__display-name {
   }
 }
 
+.account-switcher {
+  margin-inline-start: auto;
+
+  .icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.navigation-bar .account__info-wrapper {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.navigation-bar .account__display-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.account-switcher .icon-button {
+  width: 32px !important;
+  height: 32px !important;
+}
+
+.account-switcher__menu-item button {
+  min-width: 240px;
+}
+
+.account-switcher__menu-item .account__avatar {
+  flex: 0 0 auto;
+}
+
+.account-switcher__menu-item .icon-check {
+  margin-inline-start: auto;
+}
+
 .display-name {
   display: block;
   max-width: 100%;

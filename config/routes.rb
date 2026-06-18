@@ -77,6 +77,11 @@ Rails.application.routes.draw do
       resource :acceptance, only: [:create]
       resource :setup, only: [:show, :update], controller: :setup
       resource :challenge, only: [:create]
+      resource :account_switcher, only: [:show], controller: :account_switcher do
+        post :add
+        post :switch
+        delete :remove
+      end
       post 'captcha_confirmation', to: 'confirmations#confirm_captcha', as: :captcha_confirmation
       namespace :sessions do
         resource :security_key_options, only: :show
