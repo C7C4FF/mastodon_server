@@ -36,6 +36,7 @@ import { selectUnreadNotificationGroupsCount } from 'mastodon/selectors/notifica
 import { useAppSelector, useAppDispatch } from 'mastodon/store';
 
 import { DisabledAccountBanner } from './components/disabled_account_banner';
+import { AccountSwitcher } from './components/account_switcher';
 import { MoreLink } from './components/more_link';
 import { SignInBanner } from './components/sign_in_banner';
 
@@ -115,7 +116,12 @@ const ProfileCard: React.FC = () => {
 
   return (
     <div className='navigation-bar'>
-      <Account id={me} minimal size={36} />
+      <Account
+        id={me}
+        minimal
+        size={36}
+        extraAccountInfo={<AccountSwitcher />}
+      />
     </div>
   );
 };

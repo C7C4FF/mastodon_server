@@ -2,6 +2,7 @@
 
 class Auth::SessionsController < Devise::SessionsController
   include Redisable
+  include AccountSwitcherConcern
 
   MAX_2FA_ATTEMPTS_PER_HOUR = 10
 
@@ -136,6 +137,7 @@ class Auth::SessionsController < Devise::SessionsController
     clear_2fa_attempt_from_user(user)
     clear_attempt_from_session
 
+    remember_switchable_account(user)
     user.update_sign_in!(new_sign_in: true)
     sign_in(user)
     flash.delete(:notice)
