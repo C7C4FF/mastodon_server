@@ -1,4 +1,4 @@
-import { useCallback, forwardRef } from 'react';
+import { useCallback, useEffect, useState, forwardRef } from 'react';
 
 import classNames from 'classnames';
 
@@ -97,6 +97,66 @@ export const IconButton = forwardRef<HTMLButtonElement, Props>(
 
     const previousActive = usePrevious(active) ?? active;
     const shouldAnimate = animate && active !== previousActive;
+    const [
+      { currentCounter, exitingCounter, enteringCounter },
+      setCounterState,
+    ] = useState<{
+      currentCounter: number | undefined;
+      exitingCounter: number | undefined;
+      enteringCounter: boolean;
+    }>(() => ({
+      currentCounter: counter,
+      exitingCounter: undefined,
+      enteringCounter: false,
+    }));
+
+    let counterLeaving = exitingCounter;
+    let counterEntering = enteringCounter;
+
+    if (counter !== currentCounter) {
+      counterEntering =
+        typeof currentCounter === 'undefined' && typeof counter !== 'undefined';
+      counterLeaving =
+        typeof counter === 'undefined' ? currentCounter : undefined;
+
+      setCounterState({
+        currentCounter: counter,
+        exitingCounter: counterLeaving,
+        enteringCounter: counterEntering,
+      });
+    }
+
+    const isCounterExiting =
+      typeof counter === 'undefined' && typeof counterLeaving !== 'undefined';
+    const isCounterRendered =
+      typeof counter !== 'undefined' || typeof counterLeaving !== 'undefined';
+
+    useEffect(() => {
+      if (!isCounterExiting) {
+        return undefined;
+      }
+
+      const timeout = window.setTimeout(() => {
+        setCounterState((state) => {
+          if (
+            typeof state.currentCounter === 'undefined' &&
+            state.exitingCounter === counterLeaving
+          ) {
+            return {
+              ...state,
+              exitingCounter: undefined,
+              enteringCounter: false,
+            };
+          }
+
+          return state;
+        });
+      }, 250);
+
+      return () => {
+        window.clearTimeout(timeout);
+      };
+    }, [counterLeaving, isCounterExiting]);
 
     const classes = classNames(className, 'icon-button', {
       active,
@@ -105,7 +165,7 @@ export const IconButton = forwardRef<HTMLButtonElement, Props>(
       activate: shouldAnimate && active,
       deactivate: shouldAnimate && !active,
       overlayed: overlay,
-      'icon-button--with-counter': typeof counter !== 'undefined',
+      'icon-button--with-counter': isCounterRendered,
       'icon-button--reserve-counter-space': reserveCounterSpace,
     });
 
@@ -114,9 +174,14 @@ export const IconButton = forwardRef<HTMLButtonElement, Props>(
         <span className='icon-button__icon'>
           <Icon id={icon} icon={iconComponent} aria-hidden='true' />
         </span>
-        {typeof counter !== 'undefined' ? (
+        {isCounterRendered ? (
           <span className='icon-button__counter'>
-            <AnimatedNumber value={counter} />
+            <AnimatedNumber
+              value={counter ?? 0}
+              hideZero={isCounterExiting}
+              hidePreviousZero={counterEntering}
+              initialPreviousValue={counterEntering ? 0 : undefined}
+            />
           </span>
         ) : reserveCounterSpace ? (
           <span className='icon-button__counter icon-button__counter--placeholder' aria-hidden='true' />
