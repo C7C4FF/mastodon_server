@@ -2698,14 +2698,16 @@ a.account__display-name {
 
 .no-reduce-motion .icon-button.star-icon {
   &.activate {
-    & > .icon {
+    & > .icon,
+    .icon-button__icon > .icon {
       animation: spring-rotate-in 1s linear;
       transform-origin: 50% 52%;
     }
   }
 
   &.deactivate {
-    & > .icon {
+    & > .icon,
+    .icon-button__icon > .icon {
       animation: spring-rotate-out 1s linear;
       transform-origin: 50% 52%;
     }
