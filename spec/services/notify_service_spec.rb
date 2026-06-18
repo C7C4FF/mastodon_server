@@ -97,6 +97,8 @@ RSpec.describe NotifyService do
   end
 
   describe 'email' do
+    let(:enabled) { true }
+
     before do
       user.settings.update('notification_emails.follow': enabled)
       user.save
@@ -126,6 +128,30 @@ RSpec.describe NotifyService do
 
         expect(emails).to be_empty
       end
+    end
+
+    it 'does not send emails for mentions, reblogs, or favourites even when enabled', :inline_jobs do
+      user.settings.update(
+        'notification_emails.mention': true,
+        'notification_emails.reblog': true,
+        'notification_emails.favourite': true
+      )
+      user.save!
+
+      status = Fabricate(:status, account: recipient)
+      notification_activities = {
+        mention: Fabricate(:mention, account: recipient, status: Fabricate(:status, account: sender)),
+        reblog: Fabricate(:status, account: sender, reblog: status),
+        favourite: Fabricate(:favourite, account: sender, status: status),
+      }
+
+      emails = capture_emails do
+        notification_activities.each do |notification_type, notification_activity|
+          described_class.new.call(recipient, notification_type, notification_activity)
+        end
+      end
+
+      expect(emails).to be_empty
     end
   end
 
