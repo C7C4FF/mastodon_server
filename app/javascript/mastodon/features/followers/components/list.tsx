@@ -58,7 +58,7 @@ export const AccountList: FC<AccountListProps> = ({
         <AccountListItem
           key={followerId}
           accountId={followerId}
-          withBio={false}
+          stats={[]}
           badge={withoutFollowsYouBadge ? false : null}
         />
       )) ?? [];
@@ -68,7 +68,7 @@ export const AccountList: FC<AccountListProps> = ({
         <AccountListItem
           key={prependAccountId}
           accountId={prependAccountId}
-          withBio={false}
+          stats={[]}
           badge={withoutFollowsYouBadge ? false : null}
         />,
       );

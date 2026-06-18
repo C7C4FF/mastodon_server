@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { FC } from 'react';
 
 import { FormattedMessage, FormattedNumber } from 'react-intl';
@@ -12,9 +12,9 @@ import {
   expandTimelineByKey,
   timelineKey,
 } from '@/mastodon/actions/timelines_typed';
-import { fetchAccount } from '@/mastodon/actions/accounts';
 import { AccountHeader } from '@/mastodon/components/account_header';
 import { Column } from '@/mastodon/components/column';
+import type { ColumnRef } from '@/mastodon/components/column';
 import { ColumnBackButton } from '@/mastodon/components/column_back_button';
 import { DisplayName } from '@/mastodon/components/display_name';
 import { LimitedAccountHint } from '@/mastodon/components/limited_account_hint';
@@ -92,6 +92,7 @@ const InnerTimeline: FC<{ accountId: string; multiColumn: boolean }> = ({
   const { blockedBy, hidden, suspended } = useAccountVisibility(accountId);
   const forceEmptyState = blockedBy || hidden || suspended;
   const account = useAccount(accountId);
+  const columnRef = useRef<ColumnRef>(null);
 
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -109,10 +110,9 @@ const InnerTimeline: FC<{ accountId: string; multiColumn: boolean }> = ({
     [accountId, dispatch, key],
   );
 
-  const handleRefreshProfile = useCallback(() => {
-    dispatch(fetchAccount(accountId));
-    dispatch(expandTimelineByKey({ key }));
-  }, [accountId, dispatch, key]);
+  const handleTitleClick = useCallback(() => {
+    columnRef.current?.scrollTop();
+  }, []);
 
   const { isLoading: isPinnedLoading, statusIds: pinnedStatusIds } =
     usePinnedStatusIds({ accountId, tagged, forceEmptyState });
@@ -120,10 +120,10 @@ const InnerTimeline: FC<{ accountId: string; multiColumn: boolean }> = ({
   const isLoading = !!timeline?.isLoading || isPinnedLoading;
 
   return (
-    <Column bindToDocument={!multiColumn}>
+    <Column bindToDocument={!multiColumn} ref={columnRef}>
       <ColumnBackButton
         title={account ? <DisplayName account={account} variant='simple' /> : undefined}
-        onTitleClick={handleRefreshProfile}
+        onTitleClick={handleTitleClick}
         subtitle={
           account && (
             <FormattedMessage
