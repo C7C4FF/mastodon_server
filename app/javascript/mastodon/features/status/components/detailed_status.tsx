@@ -12,7 +12,6 @@ import classNames from 'classnames';
 import { Link } from 'react-router-dom';
 
 import AlternateEmailIcon from '@/material-icons/400-24px/alternate_email.svg?react';
-import { AnimatedNumber } from 'mastodon/components/animated_number';
 import { Avatar } from 'mastodon/components/avatar';
 import { ContentWarning } from 'mastodon/components/content_warning';
 import { DisplayName } from 'mastodon/components/display_name';
@@ -160,8 +159,6 @@ export const DetailedStatus: React.FC<{
 
   let media;
   let applicationLink;
-  let reblogLink;
-  let quotesLink;
   let attachmentAspectRatio;
 
   if (properStatus.get('media_attachments').getIn([0, 'type']) === 'video') {
@@ -321,91 +318,6 @@ export const DetailedStatus: React.FC<{
     </>
   );
 
-  if (['private', 'direct'].includes(status.get('visibility') as string)) {
-    reblogLink = '';
-  } else {
-    reblogLink = (
-      <Link
-        to={`/@${status.getIn(['account', 'acct'])}/${status.get('id')}/reblogs`}
-        className='detailed-status__link'
-      >
-        <FormattedMessage
-          id='status.reblogs_count'
-          defaultMessage='{count, plural, one {{counter} boost} other {{counter} boosts}}'
-          values={{
-            count: status.get('reblogs_count'),
-            counter: (
-              <span className='detailed-status__reblogs'>
-                <AnimatedNumber value={status.get('reblogs_count')} />
-              </span>
-            ),
-          }}
-        />
-      </Link>
-    );
-  }
-
-  if (['private', 'direct'].includes(status.get('visibility') as string)) {
-    quotesLink = '';
-  } else if (signedIn) {
-    quotesLink = (
-      <Link
-        to={`/@${status.getIn(['account', 'acct'])}/${status.get('id')}/quotes`}
-        className='detailed-status__link'
-      >
-        <FormattedMessage
-          id='status.quotes_count'
-          defaultMessage='{count, plural, one {{counter} quote} other {{counter} quotes}}'
-          values={{
-            count: status.get('quotes_count'),
-            counter: (
-              <span className='detailed-status__quotes'>
-                <AnimatedNumber value={status.get('quotes_count')} />
-              </span>
-            ),
-          }}
-        />
-      </Link>
-    );
-  } else {
-    quotesLink = (
-      <span className='detailed-status__link'>
-        <FormattedMessage
-          id='status.quotes_count'
-          defaultMessage='{count, plural, one {{counter} quote} other {{counter} quotes}}'
-          values={{
-            count: status.get('quotes_count'),
-            counter: (
-              <span className='detailed-status__quotes'>
-                <AnimatedNumber value={status.get('quotes_count')} />
-              </span>
-            ),
-          }}
-        />
-      </span>
-    );
-  }
-
-  const favouriteLink = (
-    <Link
-      to={`/@${status.getIn(['account', 'acct'])}/${status.get('id')}/favourites`}
-      className='detailed-status__link'
-    >
-      <FormattedMessage
-        id='status.favourites_count'
-        defaultMessage='{count, plural, one {{counter} favorite} other {{counter} favorites}}'
-        values={{
-          count: status.get('favourites_count'),
-          counter: (
-            <span className='detailed-status__favorites'>
-              <AnimatedNumber value={status.get('favourites_count')} />
-            </span>
-          ),
-        }}
-      />
-    </Link>
-  );
-
   const { statusContentProps, hashtagBar } = getHashtagBarForStatus(
     status as StatusLike,
   );
@@ -528,14 +440,6 @@ export const DetailedStatus: React.FC<{
               />
             </div>
           )}
-
-          <div className='detailed-status__meta__line'>
-            {reblogLink}
-            {reblogLink && <>·</>}
-            {quotesLink}
-            {quotesLink && <>·</>}
-            {favouriteLink}
-          </div>
         </div>
       </div>
     </div>

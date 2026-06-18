@@ -325,14 +325,38 @@ class ActionBar extends PureComponent {
 
     const bookmarkTitle = intl.formatMessage(status.get('bookmarked') ? messages.removeBookmark : messages.bookmark);
     const favouriteTitle = intl.formatMessage(status.get('favourited') ? messages.removeFavourite : messages.favourite);
+    const repliesCount = Number(status.get('replies_count')) || 0;
+    const favouritesCount = Number(status.get('favourites_count')) || 0;
+    const visibleFavouritesCount = Math.max(favouritesCount, status.get('favourited') ? 1 : 0);
 
     return (
       <div className='detailed-status__action-bar'>
-        <div className='detailed-status__button'><IconButton title={intl.formatMessage(messages.reply)} icon={status.get('in_reply_to_account_id') === status.getIn(['account', 'id']) ? 'reply' : replyIcon} iconComponent={status.get('in_reply_to_account_id') === status.getIn(['account', 'id']) ? ReplyIcon : replyIconComponent}  onClick={this.handleReplyClick} /></div>
         <div className='detailed-status__button'>
-          <BoostButton status={status} />
+          <IconButton
+            title={intl.formatMessage(messages.reply)}
+            icon={status.get('in_reply_to_account_id') === status.getIn(['account', 'id']) ? 'reply' : replyIcon}
+            iconComponent={status.get('in_reply_to_account_id') === status.getIn(['account', 'id']) ? ReplyIcon : replyIconComponent}
+            onClick={this.handleReplyClick}
+            counter={repliesCount > 0 ? repliesCount : undefined}
+            reserveCounterSpace
+          />
         </div>
-        <div className='detailed-status__button'><IconButton className='star-icon' animate active={status.get('favourited')} title={favouriteTitle} icon='star' iconComponent={status.get('favourited') ? StarIcon : StarBorderIcon} onClick={this.handleFavouriteClick} /></div>
+        <div className='detailed-status__button'>
+          <BoostButton status={status} counters reserveCounterSpace />
+        </div>
+        <div className='detailed-status__button'>
+          <IconButton
+            className='star-icon'
+            animate
+            active={status.get('favourited')}
+            title={favouriteTitle}
+            icon='star'
+            iconComponent={status.get('favourited') ? StarIcon : StarBorderIcon}
+            onClick={this.handleFavouriteClick}
+            counter={visibleFavouritesCount > 0 ? visibleFavouritesCount : undefined}
+            reserveCounterSpace
+          />
+        </div>
         <div className='detailed-status__button'><IconButton className='bookmark-icon' disabled={!signedIn} active={status.get('bookmarked')} title={bookmarkTitle} icon='bookmark' iconComponent={status.get('bookmarked') ? BookmarkIcon : BookmarkBorderIcon} onClick={this.handleBookmarkClick} /></div>
 
         <div className='detailed-status__action-bar-dropdown'>

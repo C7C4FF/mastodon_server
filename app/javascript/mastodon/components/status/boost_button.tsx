@@ -26,7 +26,7 @@ import {
   selectStatusState,
 } from './boost_button_utils';
 
-const StandaloneBoostButton: FC<ReblogButtonProps> = ({ status, counters }) => {
+const StandaloneBoostButton: FC<ReblogButtonProps> = ({ status, counters, reserveCounterSpace }) => {
   const intl = useIntl();
   const dispatch = useAppDispatch();
   const boostsCount =
@@ -72,6 +72,7 @@ const StandaloneBoostButton: FC<ReblogButtonProps> = ({ status, counters }) => {
       className='status__action-bar__button'
       onClick={!disabled ? handleClick : undefined}
       counter={counters && visibleBoostsCount > 0 ? visibleBoostsCount : undefined}
+      reserveCounterSpace={reserveCounterSpace}
     />
   );
 };
@@ -88,11 +89,12 @@ const renderMenuItem: RenderItemFn<ActionMenuItem> = (item, index, onClick) => (
 interface ReblogButtonProps {
   status: Status;
   counters?: boolean;
+  reserveCounterSpace?: boolean;
 }
 
 type ActionMenuItemWithIcon = SomeRequired<ActionMenuItem, 'icon'>;
 
-const BoostOrQuoteMenu: FC<ReblogButtonProps> = ({ status, counters }) => {
+const BoostOrQuoteMenu: FC<ReblogButtonProps> = ({ status, counters, reserveCounterSpace }) => {
   const intl = useIntl();
   const dispatch = useAppDispatch();
   const statusState = useAppSelector((state) =>
@@ -204,6 +206,7 @@ const BoostOrQuoteMenu: FC<ReblogButtonProps> = ({ status, counters }) => {
         className='status__action-bar__button'
         iconComponent={boostIcon}
         counter={counters && visibleBoostsCount > 0 ? visibleBoostsCount : undefined}
+        reserveCounterSpace={reserveCounterSpace}
         active={isReblogged}
       />
     </Dropdown>

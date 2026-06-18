@@ -3585,7 +3585,9 @@ body.embed .button.logo-button:hover,
 }
 
 .layout-single-column .detailed-status__action-bar .icon-button:hover::after,
-.layout-single-column .status__action-bar .icon-button:hover::after {
+.layout-single-column .detailed-status__action-bar .icon-button:focus::after,
+.layout-single-column .status__action-bar .icon-button:hover::after,
+.layout-single-column .status__action-bar .icon-button:focus::after {
   opacity: 1;
 }
 
@@ -3595,14 +3597,28 @@ body.embed .button.logo-button:hover,
   border-radius: 50%;
   content: '';
   height: 36px;
-  left: 0;
+  left: 50%;
   opacity: 0;
   pointer-events: none;
   position: absolute;
-  top: -8px;
-  transform: translateX(8px) translateY(1px);
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: opacity 100ms linear;
   width: 36px;
   z-index: -1;
+}
+
+.layout-single-column .detailed-status__action-bar .icon-button__icon,
+.layout-single-column .status__action-bar .icon-button__icon {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 24px;
+  height: 24px;
+  justify-content: center;
+  isolation: isolate;
+  position: relative;
+  width: 24px;
+  z-index: 0;
 }
 
 .layout-single-column .conversation .icon-button::after {
@@ -3620,13 +3636,14 @@ body.embed .button.logo-button:hover,
 }
 
 .layout-single-column .detailed-status__button .icon-button.star-icon::after {
-  transform: translateX(3px);
+  transform: translate(-50%, -50%);
 }
 
 .layout-single-column
   .status__action-bar
   .icon-button.icon-button--with-counter::after {
-  transform: translateX(0) translateY(0);
+  left: 12px;
+  transform: translate(-50%, -50%);
 }
 
 /* Misc UI fixes */
@@ -3933,35 +3950,27 @@ body .compose-form .compose-form__uploads {
   min-width: 21px;
 }
 
-.layout-single-column .status__action-bar .icon-button--with-counter {
+.layout-single-column .status__action-bar .icon-button--with-counter,
+.layout-single-column .status__action-bar .icon-button--reserve-counter-space {
   align-items: center;
   display: inline-flex;
   gap: 6px;
+  justify-content: flex-start;
 }
 
 .layout-single-column .status__action-bar .icon-button {
   /* It's inlined so we have to use !important */
   height: 24px !important;
-  min-width: 45.78px !important;
+  min-width: 24px !important;
   position: relative;
 
   /* It's inlined so we have to use !important */
   width: unset !important;
 }
 
-/* Fix reply button not starting from the beginning */
-.layout-single-column
-  .status__action-bar
-  .icon-button:nth-of-type(1):not(.icon-button--with-counter) {
-  min-width: 42.22px !important;
-  width: 42.22px !important;
-}
-
-.layout-single-column .status__action-bar .icon-button.icon-button--with-counter {
-  justify-content: center;
-  min-width: 0 !important;
+.layout-single-column .status__action-bar .icon-button--reserve-counter-space {
+  min-width: 48px !important;
   overflow: visible;
-  width: unset !important;
 }
 
 .layout-single-column .status__action-bar .icon-button__counter {
@@ -3970,11 +3979,15 @@ body .compose-form .compose-form__uploads {
   align-items: center;
   font-size: var(--font-size-smaller);
   font-weight: 600;
-  line-height: 1;
-  min-width: 0.75em;
-  white-space: nowrap;
+  line-height: 24px;
+  min-width: 3ch;
   position: relative;
+  white-space: nowrap;
   z-index: 1;
+}
+
+.layout-single-column .status__action-bar .icon-button__counter--placeholder {
+  visibility: hidden;
 }
 
 .layout-single-column .status__action-bar .icon-button__counter .animated-number {
@@ -3995,17 +4008,14 @@ body .compose-form .compose-form__uploads {
   display: inline-flex;
 }
 
-.layout-single-column .status__action-bar .icon-button:nth-of-type(1)::after {
-  transform: translateX(4px) translateY(2px);
-}
-
 .layout-single-column
   .status__action-bar
   .icon-button.icon-button--with-counter::after,
 .layout-single-column
   .status__action-bar
-  .icon-button.icon-button--with-counter:first-of-type::after {
-  transform: translateX(-5px) translateY(1px);
+  .icon-button.icon-button--reserve-counter-space::after {
+  left: 12px;
+  transform: translate(-50%, -50%);
 }
 
 @media screen and (height <= 980px) {
@@ -4203,7 +4213,12 @@ body .compose-form .compose-form__uploads {
     order: 18;
   }
 
-  .layout-single-column .status__action-bar .icon-button:not(.icon-button--with-counter) {
+  .layout-single-column
+    .status__action-bar
+    .icon-button:not(
+      .icon-button--with-counter,
+      .icon-button--reserve-counter-space
+    ) {
     height: 24px !important;
     position: relative;
 
@@ -4211,9 +4226,11 @@ body .compose-form .compose-form__uploads {
     width: 50px !important;
   }
 
-  .layout-single-column .status__action-bar .icon-button.icon-button--with-counter {
+  .layout-single-column .status__action-bar .icon-button.icon-button--with-counter,
+  .layout-single-column .status__action-bar .icon-button--reserve-counter-space {
     height: 24px !important;
-    min-width: 45.78px !important;
+    min-width: 48px !important;
+    overflow: visible !important;
     width: unset !important;
   }
 
@@ -4741,13 +4758,80 @@ body .navigation-panel__legal .column-link[href='/about'] svg {
 }
 
 .layout-single-column .detailed-status__action-bar .icon-button {
-  min-width: 24px;
+  height: 24px !important;
   position: relative;
+}
+
+.layout-single-column .detailed-status__action-bar .icon-button--with-counter,
+.layout-single-column .detailed-status__action-bar .icon-button--reserve-counter-space {
+  align-items: center;
+  display: inline-flex;
+  gap: 0;
+  justify-content: center;
+}
+
+.layout-single-column .detailed-status__action-bar .icon-button.icon-button--with-counter {
+  min-width: 24px !important;
+  overflow: visible;
+  width: 24px !important;
+}
+
+.layout-single-column .detailed-status__action-bar .icon-button--reserve-counter-space {
+  min-width: 24px !important;
+  overflow: visible;
+  width: 24px !important;
+}
+
+.layout-single-column .detailed-status__action-bar .icon-button__counter {
+  color: currentColor;
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--font-size-smaller);
+  font-weight: 600;
+  left: 30px;
+  line-height: 24px;
+  min-width: 3ch;
+  position: absolute;
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.layout-single-column .detailed-status__action-bar .icon-button__counter--placeholder {
+  visibility: hidden;
+}
+
+.layout-single-column .detailed-status__action-bar .icon-button__counter .animated-number {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  overflow: visible;
+  vertical-align: middle;
+}
+
+.layout-single-column .detailed-status__action-bar .icon-button__counter .animated-number > span {
+  display: inline-flex;
+  align-items: center;
+}
+
+.layout-single-column .detailed-status__button {
+  align-items: center;
+  display: flex;
+  flex: 1 1 0;
+  justify-content: center;
+  min-width: 0;
+}
+
+.layout-single-column .detailed-status__action-bar-dropdown {
+  align-items: center;
+  display: flex;
+  flex: 1 1 0;
+  justify-content: center;
+  min-width: 0;
 }
 
 .layout-single-column .detailed-status__action-bar-dropdown .icon-button::after,
 .layout-single-column .detailed-status__button .icon-button::after {
-  transform: translateX(-6px);
+  transform: translate(-50%, -50%);
 }
 
 /* Add border radius to media */
@@ -5253,11 +5337,12 @@ div[tabindex='-1']
 }
 
 .layout-single-column .status__action-bar .icon-button.star-icon::after {
-  left: -3px;
+  left: 12px;
 }
 
 .layout-single-column .status__action-bar .icon-button.icon-button--with-counter.star-icon::after {
-  transform: translateX(-2px) translateY(2px);
+  left: 12px;
+  transform: translate(-50%, -50%);
 }
 
 /* Disable default Mastodon animation: spring-rotate-in 1s linear; */
@@ -5650,6 +5735,12 @@ body.layout-single-column.scroll-down .tabs-bar__portal {
 }
 
 .layout-single-column button.icon-button.icon-button--with-counter.activate.star-icon > .icon-star {
+  left: 0 !important;
+  position: absolute !important;
+  top: unset !important;
+}
+
+.layout-single-column button.icon-button.icon-button--with-counter.activate.star-icon .icon-button__icon > .icon-star {
   left: 0 !important;
   position: absolute !important;
   top: unset !important;
@@ -6140,12 +6231,15 @@ body.layout-single-column.scroll-down .tabs-bar__portal {
 
 .layout-single-column.no-reduce-motion
   .status__action-bar
+  .icon-button.icon-button--reserve-counter-space,
+.layout-single-column.no-reduce-motion
+  .status__action-bar
   .icon-button.icon-button--with-counter.star-icon,
 .layout-single-column
   .status__action-bar
   .icon-button.icon-button--with-counter {
   max-width: none !important;
-  min-width: 45.78px !important;
+  min-width: 48px !important;
   overflow: visible !important;
   width: auto !important;
 }
