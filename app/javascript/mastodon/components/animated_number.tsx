@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 
 import { animated, useSpring, config } from '@react-spring/web';
 
@@ -11,50 +11,43 @@ interface Props {
 }
 export const AnimatedNumber: React.FC<Props> = ({ value }) => {
   const [previousValue, setPreviousValue] = useState(value);
-  const [hasMounted, setHasMounted] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
   const direction = value > previousValue ? -1 : 1;
+  const isAnimating = value !== previousValue;
 
-  const [styles, api] = useSpring(
-    () => ({
-      from: { transform: `translateY(${100 * direction}%)` },
-      to: { transform: 'translateY(0%)' },
-      onRest() {
-        setPreviousValue(value);
-        setIsAnimating(false);
-      },
-      config: { ...config.gentle, duration: 200 },
-      immediate: true, // This ensures that the animation is not played when the component is first rendered
-    }),
-    [value, previousValue],
-  );
+  const [styles, api] = useSpring(() => ({
+    transform: 'translateY(0%)',
+    config: { ...config.gentle, duration: 200 },
+    immediate: true,
+  }));
 
-  // When the value changes, start the animation
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (value !== previousValue) {
-      setIsAnimating(true);
-      void api.start({ reset: true });
+      void api.start({
+        from: { transform: `translateY(${100 * direction}%)` },
+        to: { transform: 'translateY(0%)' },
+        reset: true,
+        immediate: false,
+        onRest() {
+          setPreviousValue(value);
+        },
+      });
     }
-  }, [api, previousValue, value]);
+  }, [api, direction, previousValue, value]);
 
-  if (reduceMotion || !hasMounted || !isAnimating) {
+  if (reduceMotion || !isAnimating) {
     return <ShortNumber value={value} />;
   }
 
   return (
     <span className='animated-number'>
-      <animated.span style={styles}>
+      <animated.span className='animated-number__current' style={styles}>
         <ShortNumber value={value} />
       </animated.span>
       {value !== previousValue && (
         <animated.span
+          className='animated-number__previous'
           style={{
             ...styles,
-            position: 'absolute',
             top: `${-100 * direction}%`, // Adds extra space on top of translateY
           }}
           role='presentation'

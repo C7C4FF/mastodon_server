@@ -3468,17 +3468,17 @@ body.embed .button.logo-button:hover,
   background-color: var(--color-profile-button-hover);
 }
 
-.layout-multiple-columns .detailed-status__action-bar .icon-button:focus,
-.layout-multiple-columns .status__action-bar .icon-button:focus,
+.layout-multiple-columns .detailed-status__action-bar .icon-button:focus-visible,
+.layout-multiple-columns .status__action-bar .icon-button:focus-visible,
 .layout-multiple-columns .detailed-status__action-bar .icon-button:hover,
 .layout-multiple-columns .status__action-bar .icon-button:hover {
   background-color: transparent;
 }
 
 .layout-multiple-columns .detailed-status__action-bar .icon-button:hover::after,
-.layout-multiple-columns .detailed-status__action-bar .icon-button:focus::after,
+.layout-multiple-columns .detailed-status__action-bar .icon-button:focus-visible::after,
 .layout-multiple-columns .status__action-bar .icon-button:hover::after,
-.layout-multiple-columns .status__action-bar .icon-button:focus::after {
+.layout-multiple-columns .status__action-bar .icon-button:focus-visible::after {
   opacity: 1;
 }
 
@@ -3563,7 +3563,7 @@ body.embed .button.logo-button:hover,
   display: inline-flex;
   align-items: center;
   line-height: 1;
-  overflow: visible;
+  overflow: hidden;
   vertical-align: middle;
 }
 
@@ -3936,7 +3936,7 @@ body .compose-form .compose-form__uploads {
   display: inline-flex;
   align-items: center;
   line-height: 1;
-  overflow: visible;
+  overflow: hidden;
   vertical-align: middle;
 }
 
@@ -5064,8 +5064,8 @@ div[tabindex='-1']
     animation: sparkles-width .65s 1, sparkles-size .65s 1, popping .5s 1 !important;
   }
 
-  .layout-multiple-columns .detailed-status__action-bar button.icon-button.star-icon.activate::after,
-  .layout-multiple-columns .status__action-bar button.icon-button.activate.star-icon::after {
+  .layout-multiple-columns .detailed-status__action-bar button.icon-button.star-icon.activate:not(.icon-button--with-counter)::after,
+  .layout-multiple-columns .status__action-bar button.icon-button.activate.star-icon:not(.icon-button--with-counter)::after {
     animation: sparkles-width .65s 1, sparkles-size .65s 1;
   }
 
@@ -5075,8 +5075,8 @@ div[tabindex='-1']
   }
 }
 
-.layout-multiple-columns .detailed-status__action-bar button.icon-button.star-icon.activate::after,
-.layout-multiple-columns .status__action-bar button.icon-button.activate.star-icon::after {
+.layout-multiple-columns .detailed-status__action-bar button.icon-button.star-icon.activate:not(.icon-button--with-counter)::after,
+.layout-multiple-columns .status__action-bar button.icon-button.activate.star-icon:not(.icon-button--with-counter)::after {
   background-color: unset !important;
   content: '';
   height: 50px !important;
@@ -5092,8 +5092,8 @@ div[tabindex='-1']
 }
 
 .layout-multiple-columns.no-reduce-motion .icon-button.star-icon.activate .icon-star,
-.layout-multiple-columns .detailed-status__action-bar button.icon-button.star-icon.activate::after,
-.layout-multiple-columns .status__action-bar button.icon-button.activate.star-icon::after {
+.layout-multiple-columns .detailed-status__action-bar button.icon-button.star-icon.activate:not(.icon-button--with-counter)::after,
+.layout-multiple-columns .status__action-bar button.icon-button.activate.star-icon:not(.icon-button--with-counter)::after {
   display: block !important;
 }
 
