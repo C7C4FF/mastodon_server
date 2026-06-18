@@ -75,6 +75,7 @@ export const AccountListItem: React.FC<Props> = ({
     badgeProp ?? (relationship?.followed_by ? <FollowsYouBadge /> : null);
 
   const firstVerifiedField = account.fields.find((item) => !!item.verified_at);
+  const hasNumberFields = stats.length > 0 || firstVerifiedField;
 
   return (
     <div className={classes.wrapper} data-with-border={withBorder}>
@@ -100,88 +101,93 @@ export const AccountListItem: React.FC<Props> = ({
         </ListItemLink>
       </ListItemWrapper>
 
-      <NumberFields>
-        {stats.includes('followers') && (
-          <NumberFieldsItem
-            label={
-              <FormattedMessage
-                id='account.followers'
-                defaultMessage='Followers'
-              />
-            }
-            hint={intl.formatNumber(account.followers_count)}
-          >
-            <ShortNumber value={account.followers_count} />
-          </NumberFieldsItem>
-        )}
-        {stats.includes('following') && (
-          <NumberFieldsItem
-            label={
-              <FormattedMessage
-                id='account.following'
-                defaultMessage='Following'
-              />
-            }
-            hint={intl.formatNumber(account.following_count)}
-            link={`/@${account.acct}/following`}
-          >
-            <ShortNumber value={account.following_count} />
-          </NumberFieldsItem>
-        )}
-        {stats.includes('posts') && (
-          <NumberFieldsItem
-            label={
-              <FormattedMessage id='account.posts' defaultMessage='Posts' />
-            }
-            hint={intl.formatNumber(account.statuses_count)}
-          >
-            <ShortNumber value={account.statuses_count} />
-          </NumberFieldsItem>
-        )}
-        {stats.includes('joined') && (
-          <NumberFieldsItem
-            label={
-              <FormattedMessage
-                id='account.joined_short'
-                defaultMessage='Joined'
-              />
-            }
-            hint={intl.formatDate(account.created_at)}
-          >
-            {createdThisYear ? (
-              <FormattedDateWrapper
-                value={account.created_at}
-                month='short'
-                day='2-digit'
-              />
-            ) : (
-              <FormattedDateWrapper value={account.created_at} year='numeric' />
-            )}
-          </NumberFieldsItem>
-        )}
-        {stats.includes('last-active') && (
-          <NumberFieldsItem
-            label={
-              <FormattedMessage
-                id='account.last_active'
-                defaultMessage='Last active'
-              />
-            }
-          >
-            {account.last_status_at ? (
-              <RelativeTimestamp long timestamp={account.last_status_at} />
-            ) : (
-              '-'
-            )}
-          </NumberFieldsItem>
-        )}
-        {firstVerifiedField && (
-          <VerifiedBadge
-            link={firstVerifiedField.value}
-            className={classes.verifiedBadge}
-          />
-        )}
-      </NumberFields>
+      {hasNumberFields && (
+        <NumberFields>
+          {stats.includes('followers') && (
+            <NumberFieldsItem
+              label={
+                <FormattedMessage
+                  id='account.followers'
+                  defaultMessage='Followers'
+                />
+              }
+              hint={intl.formatNumber(account.followers_count)}
+            >
+              <ShortNumber value={account.followers_count} />
+            </NumberFieldsItem>
+          )}
+          {stats.includes('following') && (
+            <NumberFieldsItem
+              label={
+                <FormattedMessage
+                  id='account.following'
+                  defaultMessage='Following'
+                />
+              }
+              hint={intl.formatNumber(account.following_count)}
+              link={`/@${account.acct}/following`}
+            >
+              <ShortNumber value={account.following_count} />
+            </NumberFieldsItem>
+          )}
+          {stats.includes('posts') && (
+            <NumberFieldsItem
+              label={
+                <FormattedMessage id='account.posts' defaultMessage='Posts' />
+              }
+              hint={intl.formatNumber(account.statuses_count)}
+            >
+              <ShortNumber value={account.statuses_count} />
+            </NumberFieldsItem>
+          )}
+          {stats.includes('joined') && (
+            <NumberFieldsItem
+              label={
+                <FormattedMessage
+                  id='account.joined_short'
+                  defaultMessage='Joined'
+                />
+              }
+              hint={intl.formatDate(account.created_at)}
+            >
+              {createdThisYear ? (
+                <FormattedDateWrapper
+                  value={account.created_at}
+                  month='short'
+                  day='2-digit'
+                />
+              ) : (
+                <FormattedDateWrapper
+                  value={account.created_at}
+                  year='numeric'
+                />
+              )}
+            </NumberFieldsItem>
+          )}
+          {stats.includes('last-active') && (
+            <NumberFieldsItem
+              label={
+                <FormattedMessage
+                  id='account.last_active'
+                  defaultMessage='Last active'
+                />
+              }
+            >
+              {account.last_status_at ? (
+                <RelativeTimestamp long timestamp={account.last_status_at} />
+              ) : (
+                '-'
+              )}
+            </NumberFieldsItem>
+          )}
+          {firstVerifiedField && (
+            <VerifiedBadge
+              link={firstVerifiedField.value}
+              className={classes.verifiedBadge}
+            />
+          )}
+        </NumberFields>
+      )}
       {withBio && account.note.length > 0 && (
         <EmojiHTML
           className={classNames(classes.bio, 'translate')}
