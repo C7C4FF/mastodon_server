@@ -40,6 +40,25 @@ class Auth::AccountSwitcherController < ApplicationController
     render_accounts
   end
 
+  def logout
+    forget_switchable_account(current_user)
+
+    next_user = switchable_account_users.find(&:functional?)
+
+    if next_user
+      SessionActivation.deactivate(cookies.signed['_session_id'])
+      cookies.delete('_session_id')
+      sign_in(:user, next_user)
+      remember_switchable_account(next_user)
+
+      respond_with_redirect('/web/home')
+    else
+      sign_out(:user)
+
+      respond_with_redirect(new_user_session_path)
+    end
+  end
+
   private
 
   def account_id_param
