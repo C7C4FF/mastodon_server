@@ -9839,6 +9839,32 @@ noscript {
     border-radius: 4px;
   }
 
+  &--signed-out {
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__signed-out-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  &__signed-out-message {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 17px;
+    line-height: 24px;
+    text-align: center;
+  }
+
+  &__signed-out-button {
+    min-width: 180px;
+  }
+
   &__footer {
     color: var(--color-text-tertiary);
     text-align: center;
