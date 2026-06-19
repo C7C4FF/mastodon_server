@@ -1,4 +1,5 @@
 import api, { getLinks } from '../api';
+import { unescapeHTML } from '../utils/html';
 
 import {
   importFetchedAccounts,
@@ -19,6 +20,35 @@ export const CONVERSATIONS_READ = 'CONVERSATIONS_READ';
 export const CONVERSATIONS_DELETE_REQUEST = 'CONVERSATIONS_DELETE_REQUEST';
 export const CONVERSATIONS_DELETE_SUCCESS = 'CONVERSATIONS_DELETE_SUCCESS';
 export const CONVERSATIONS_DELETE_FAIL    = 'CONVERSATIONS_DELETE_FAIL';
+
+const notifiedConversationStatusIds = new Set();
+
+const notifyConversation = (conversation, getState) => {
+  const status = conversation.last_status;
+
+  if (!conversation.unread || !status || notifiedConversationStatusIds.has(status.id) || status.account?.id === getState().getIn(['meta', 'me'])) {
+    return;
+  }
+
+  notifiedConversationStatusIds.add(status.id);
+
+  if (typeof window.Notification === 'undefined' || window.Notification.permission !== 'granted') {
+    return;
+  }
+
+  const name = status.account.display_name || status.account.username;
+  const body = status.spoiler_text?.length > 0 ? status.spoiler_text : unescapeHTML(status.content || '');
+  const notification = new Notification(`${name}님의 다이렉트 메세지`, {
+    body,
+    icon: status.account.avatar,
+    tag: `direct-${conversation.id}`,
+  });
+
+  notification.addEventListener('click', () => {
+    window.focus();
+    notification.close();
+  });
+};
 
 export const mountConversations = () => ({
   type: CONVERSATIONS_MOUNT,
@@ -75,7 +105,7 @@ export const expandConversationsFail = error => ({
   error,
 });
 
-export const updateConversations = conversation => dispatch => {
+export const updateConversations = conversation => (dispatch, getState) => {
   dispatch(importFetchedAccounts(conversation.accounts));
 
   if (conversation.last_status) {
@@ -86,6 +116,8 @@ export const updateConversations = conversation => dispatch => {
     type: CONVERSATIONS_UPDATE,
     conversation,
   });
+
+  notifyConversation(conversation, getState);
 };
 
 export const deleteConversation = conversationId => (dispatch) => {

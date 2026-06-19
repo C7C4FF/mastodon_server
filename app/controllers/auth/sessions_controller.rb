@@ -14,10 +14,13 @@ class Auth::SessionsController < Devise::SessionsController
   skip_before_action :update_user_sign_in
 
   around_action :preserve_stored_location, only: :destroy, if: :continue_after?
+  before_action :sign_out_current_user_for_account_switcher!, only: :create, if: :adding_switchable_account?
 
   prepend_before_action :check_suspicious!, only: [:create]
 
   include Auth::TwoFactorAuthenticationConcern
+
+  helper_method :adding_switchable_account?
 
   content_security_policy only: :new do |p|
     p.form_action(false)
@@ -71,6 +74,8 @@ class Auth::SessionsController < Devise::SessionsController
   end
 
   def require_no_authentication
+    return if adding_switchable_account?
+
     super
 
     # Delete flash message that isn't entirely useful and may be confusing in
@@ -138,6 +143,7 @@ class Auth::SessionsController < Devise::SessionsController
     clear_attempt_from_session
 
     remember_switchable_account(user)
+    stop_switchable_account_add
     user.update_sign_in!(new_sign_in: true)
     sign_in(user)
     flash.delete(:notice)
@@ -191,5 +197,12 @@ class Auth::SessionsController < Devise::SessionsController
       end
       format.all { super(**) }
     end
+  end
+
+  def sign_out_current_user_for_account_switcher!
+    return unless user_signed_in?
+
+    remember_switchable_account(current_user)
+    sign_out(:user)
   end
 end

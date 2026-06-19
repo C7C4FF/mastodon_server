@@ -70,6 +70,7 @@ import { attachFullscreenListener, detachFullscreenListener, isFullscreen } from
 
 import ActionBar from './components/action_bar';
 import { DetailedStatus } from './components/detailed_status';
+import { DirectReplyComposer } from './components/direct_reply_composer';
 import { RefreshController } from './components/refresh_controller';
 import { quoteComposeById } from '@/mastodon/actions/compose_typed';
 import { FOCUS_TARGET, NavigationFocusTarget } from '@/mastodon/components/navigation_focus_target';
@@ -101,6 +102,7 @@ const makeMapStateToProps = () => {
       status,
       ancestorsIds,
       descendantsIds,
+      directMessageIds: status?.get('visibility') === 'direct' ? (state.contexts.directMessages[props.params.statusId] ?? []) : [],
       askReplyConfirmation: state.getIn(['compose', 'text']).trim().length !== 0,
       domain: state.getIn(['meta', 'domain']),
       pictureInPicture: getPictureInPicture(state, { id: props.params.statusId }),
@@ -138,6 +140,7 @@ class Status extends ImmutablePureComponent {
     isLoading: PropTypes.bool,
     ancestorsIds: PropTypes.arrayOf(PropTypes.string).isRequired,
     descendantsIds: PropTypes.arrayOf(PropTypes.string).isRequired,
+    directMessageIds: PropTypes.arrayOf(PropTypes.string).isRequired,
     intl: PropTypes.object.isRequired,
     askReplyConfirmation: PropTypes.bool,
     multiColumn: PropTypes.bool,
@@ -483,13 +486,15 @@ class Status extends ImmutablePureComponent {
   };
 
   componentDidUpdate(prevProps) {
-    const { status, descendantsIds, params } = this.props;
+    const { status, descendantsIds, directMessageIds, params } = this.props;
 
     const isSameStatus = status && (prevProps.status?.get('id') === status.get('id'));
+    const previousReplyIds = status?.get('visibility') === 'direct' ? prevProps.directMessageIds : prevProps.descendantsIds;
+    const currentReplyIds = status?.get('visibility') === 'direct' ? directMessageIds : descendantsIds;
 
     // Only highlight replies after the initial load
-    if (prevProps.descendantsIds.length && isSameStatus) {
-      const newRepliesIds = difference(descendantsIds, prevProps.descendantsIds);
+    if (previousReplyIds.length && isSameStatus) {
+      const newRepliesIds = difference(currentReplyIds, previousReplyIds);
 
       if (newRepliesIds.length) {
         this.setState({newRepliesIds});
@@ -519,6 +524,10 @@ class Status extends ImmutablePureComponent {
       return false;
     }
 
+    if (this.props.status?.get('visibility') === 'direct' && this.node) {
+      return [0, this.node.scrollHeight];
+    }
+
     // Scroll to focused post if it is loaded
     if (this.statusNode) {
       return [0, this.statusNode.offsetTop];
@@ -530,7 +539,7 @@ class Status extends ImmutablePureComponent {
 
   render () {
     let ancestors, descendants, remoteHint;
-    const { isLoading, status, ancestorsIds, descendantsIds, refresh, intl, domain, multiColumn, pictureInPicture } = this.props;
+    const { isLoading, status, ancestorsIds, descendantsIds, directMessageIds, refresh, intl, domain, multiColumn, pictureInPicture } = this.props;
     const { fullscreen } = this.state;
 
     if (isLoading) {
@@ -571,6 +580,39 @@ class Status extends ImmutablePureComponent {
       onTranslate: this.handleHotkeyTranslate,
     };
 
+    if (status.get('visibility') === 'direct') {
+      const directMessages = directMessageIds.length > 0 ? directMessageIds : [status.get('id')];
+
+      return (
+        <Column bindToDocument={!multiColumn} label={intl.formatMessage(messages.detailedStatus)}>
+          <ColumnHeader
+            showBackButton
+            multiColumn={multiColumn}
+          />
+
+          <ScrollContainer scrollKey='thread' shouldUpdateScroll={this.shouldUpdateScroll} childRef={this.setContainerRef}>
+            <div className={classNames('item-list scrollable scrollable--flex direct-conversation-thread', { fullscreen })} ref={this.setContainerRef}>
+              {this.renderChildren(directMessages)}
+
+              <RefreshController
+                isLocal={isLocal}
+                statusId={status.get('id')}
+                statusCreatedAt={status.get('created_at')}
+              />
+            </div>
+          </ScrollContainer>
+
+          <DirectReplyComposer status={status} />
+
+          <Helmet>
+            <title>{titleFromStatus(intl, status)}</title>
+            <meta name='robots' content={(isLocal && isIndexable) ? 'all' : 'noindex'} />
+            <link rel='canonical' href={status.get('url')} />
+          </Helmet>
+        </Column>
+      );
+    }
+
     return (
       <Column bindToDocument={!multiColumn} label={intl.formatMessage(messages.detailedStatus)}>
         <ColumnHeader
@@ -582,14 +624,14 @@ class Status extends ImmutablePureComponent {
         />
 
         <ScrollContainer scrollKey='thread' shouldUpdateScroll={this.shouldUpdateScroll} childRef={this.setContainerRef}>
-          <div className={classNames('item-list scrollable scrollable--flex', { fullscreen })} ref={this.setContainerRef}>
+          <div className={classNames('item-list scrollable scrollable--flex', { fullscreen, 'direct-conversation-thread': status.get('visibility') === 'direct' })} ref={this.setContainerRef}>
             {ancestors}
 
             <Hotkeys handlers={handlers}>
               <NavigationFocusTarget
                 as='div'
                 focusTargetName={FOCUS_TARGET.POST}
-                className={classNames('focusable', 'detailed-status__wrapper', `detailed-status__wrapper-${status.get('visibility')}`)}
+                className={classNames('focusable', 'detailed-status__wrapper', `detailed-status__wrapper-${status.get('visibility')}`, { 'detailed-status__wrapper-own': status.getIn(['account', 'id']) === this.props.identity.accountId })}
                 tabIndex={0}
                 aria-label={textForScreenReader({intl, status})} ref={this.setStatusRef}
               >
@@ -645,6 +687,8 @@ class Status extends ImmutablePureComponent {
             />
           </div>
         </ScrollContainer>
+
+        {status.get('visibility') === 'direct' && <DirectReplyComposer status={status} />}
 
         <Helmet>
           <title>{titleFromStatus(intl, status)}</title>

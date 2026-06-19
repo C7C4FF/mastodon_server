@@ -10,6 +10,10 @@ class HomeFeed < Feed
     @async_refresh ||= AsyncRefresh.new(redis_regeneration_key)
   end
 
+  def get(limit, max_id = nil, since_id = nil, min_id = nil)
+    super.not_direct_visibility
+  end
+
   def regenerating?
     async_refresh.running?
   rescue Redis::CommandError

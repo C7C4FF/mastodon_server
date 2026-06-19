@@ -12,6 +12,7 @@ import { debounce } from 'lodash';
 
 import { scrollRight } from '../../scroll';
 import { focusApp, unfocusApp, changeLayout } from 'mastodon/actions/app';
+import { expandAllConversations } from 'mastodon/actions/all_conversations';
 import { synchronouslySubmitMarkers, submitMarkers, fetchMarkers } from 'mastodon/actions/markers';
 import { fetchNotifications } from 'mastodon/actions/notification_groups';
 import { INTRODUCTION_VERSION } from 'mastodon/actions/onboarding';
@@ -22,10 +23,12 @@ import { HoverCardController } from 'mastodon/components/hover_card_controller';
 import { PictureInPicture } from 'mastodon/features/picture_in_picture';
 import { identityContextPropShape, withIdentity } from 'mastodon/identity_context';
 import { layoutFromWindow } from 'mastodon/is_mobile';
+import { canManageReports } from 'mastodon/permissions';
 import { WithRouterPropTypes } from 'mastodon/utils/react_router';
 import { checkAnnualReport } from '@/mastodon/reducers/slices/annual_report';
 
 import { uploadCompose, resetCompose, changeComposeSpoilerness } from '../../actions/compose';
+import { expandConversations } from '../../actions/conversations';
 import { clearHeight } from '../../actions/height_cache';
 import { fetchServer, fetchServerTranslationLanguages } from '../../actions/server';
 import { expandHomeTimeline } from '../../actions/timelines';
@@ -52,6 +55,7 @@ import {
   Reblogs,
   Favourites,
   DirectTimeline,
+  AllDirectTimeline,
   HashtagTimeline,
   Notifications,
   NotificationRequests,
@@ -75,7 +79,6 @@ import {
   Directory,
   OnboardingProfile,
   OnboardingFollows,
-  Explore,
   Search,
   About,
   PrivacyPolicy,
@@ -174,7 +177,7 @@ class SwitchingColumnsArea extends PureComponent {
     } else if (singleUserMode && owner && initialState?.accounts[owner]) {
       rootRedirect = `/@${initialState.accounts[owner].username}`;
     } else if (trendsEnabled && landingPage === 'trends') {
-      rootRedirect = '/explore';
+      rootRedirect = '/about';
     } else if (localLiveFeedAccess === 'public' && landingPage === 'local_feed') {
       rootRedirect = '/public/local';
     } else if (landingPage === 'overview') {
@@ -201,6 +204,8 @@ class SwitchingColumnsArea extends PureComponent {
             <WrappedRoute path='/privacy-policy' component={PrivacyPolicy} content={children} />
             <WrappedRoute path='/terms-of-service/:date?' component={TermsOfService} content={children} />
 
+            {!signedIn && <Redirect from='/home' to={rootRedirect} exact />}
+            {!signedIn && <Redirect from='/timelines/home' to={rootRedirect} exact />}
             <WrappedRoute path={['/home', '/timelines/home']} component={HomeTimeline} content={children} />
             <Redirect from='/timelines/public' to='/public' exact />
             <Redirect from='/timelines/public/local' to='/public/local' exact />
@@ -208,6 +213,8 @@ class SwitchingColumnsArea extends PureComponent {
             <WrappedRoute path='/public/local' exact component={Firehose} content={children} />
             <Redirect from='/public/remote' to='/public/local' exact />
             <WrappedRoute path={['/conversations', '/timelines/direct']} component={DirectTimeline} content={children} />
+            <WrappedRoute path='/all_conversations/:statusId' exact component={Status} content={children} />
+            <WrappedRoute path='/all_conversations' component={AllDirectTimeline} content={children} />
             <WrappedRoute path='/tags/:id' component={HashtagTimeline} content={children} />
             <WrappedRoute path='/links/:url' component={LinkTimeline} content={children} />
             <WrappedRoute path='/lists/new' component={ListEdit} content={children} />
@@ -225,7 +232,7 @@ class SwitchingColumnsArea extends PureComponent {
             <WrappedRoute path='/start/profile' exact component={OnboardingProfile} content={children} />
             <WrappedRoute path={['/start', '/start/follows']} exact component={OnboardingFollows} content={children} />
             <WrappedRoute path='/directory' component={Directory} content={children} />
-            <WrappedRoute path='/explore' component={Explore} content={children} />
+            <Redirect from='/explore' to={signedIn ? '/home' : '/about'} />
             <WrappedRoute path='/search' component={Search} content={children} />
             <WrappedRoute path={['/publish', '/statuses/new']} component={Compose} content={children} />
 
@@ -418,7 +425,7 @@ class UI extends PureComponent {
   }
 
   componentDidMount () {
-    const { signedIn } = this.props.identity;
+    const { signedIn, permissions } = this.props.identity;
 
     window.addEventListener('focus', this.handleWindowFocus, false);
     window.addEventListener('blur', this.handleWindowBlur, false);
@@ -437,6 +444,10 @@ class UI extends PureComponent {
     if (signedIn) {
       this.props.dispatch(fetchMarkers());
       this.props.dispatch(expandHomeTimeline());
+      this.props.dispatch(expandConversations());
+      if (canManageReports(permissions)) {
+        this.props.dispatch(expandAllConversations());
+      }
       this.props.dispatch(fetchNotifications());
       this.props.dispatch(fetchServerTranslationLanguages());
       this.props.dispatch(checkAnnualReport());

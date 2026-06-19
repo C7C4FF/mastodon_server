@@ -1,25 +1,18 @@
 import { Map as ImmutableMap, List as ImmutableList } from 'immutable';
 
-import { blockAccountSuccess, muteAccountSuccess } from 'mastodon/actions/accounts';
-import { blockDomainSuccess } from 'mastodon/actions/domain_blocks';
-
 import {
-  CONVERSATIONS_MOUNT,
-  CONVERSATIONS_UNMOUNT,
-  CONVERSATIONS_FETCH_REQUEST,
-  CONVERSATIONS_FETCH_SUCCESS,
-  CONVERSATIONS_FETCH_FAIL,
-  CONVERSATIONS_UPDATE,
-  CONVERSATIONS_READ,
-  CONVERSATIONS_DELETE_SUCCESS,
-} from '../actions/conversations';
+  ALL_CONVERSATIONS_FETCH_REQUEST,
+  ALL_CONVERSATIONS_FETCH_SUCCESS,
+  ALL_CONVERSATIONS_FETCH_FAIL,
+  ALL_CONVERSATIONS_UPDATE,
+  ALL_CONVERSATIONS_READ,
+} from '../actions/all_conversations';
 import { compareId } from '../compare_id';
 
 const initialState = ImmutableMap({
   items: ImmutableList(),
   isLoading: false,
   hasMore: true,
-  mounted: false,
 });
 
 const conversationToMap = item => ImmutableMap({
@@ -30,16 +23,19 @@ const conversationToMap = item => ImmutableMap({
   last_status: item.last_status ? item.last_status.id : null,
 });
 
-const updateConversation = (state, item) => state.update('items', list => {
-  const index   = list.findIndex(x => x.get('id') === item.id);
+const updateConversation = (state, item) => {
   const newItem = conversationToMap(item);
 
-  if (index === -1) {
+  return state.update('items', list => {
+    const itemIndex = list.findIndex(x => x.get('id') === newItem.get('id'));
+
+    if (itemIndex > -1) {
+      list = list.delete(itemIndex);
+    }
+
     return list.unshift(newItem);
-  } else {
-    return list.set(index, newItem);
-  }
-});
+  });
+};
 
 const expandNormalizedConversations = (state, conversations, next, isLoadingRecent) => {
   let items = ImmutableList(conversations.map(conversationToMap));
@@ -80,31 +76,23 @@ const expandNormalizedConversations = (state, conversations, next, isLoadingRece
   });
 };
 
-const filterConversations = (state, accountIds) => {
-  return state.update('items', list => list.filterNot(item => item.get('accounts').some(accountId => accountIds.includes(accountId))));
-};
-
-export const selectUnreadConversationsCount = state => (
+export const selectUnreadAllConversationsCount = state => (
   state
-    .getIn(['conversations', 'items'])
-    .reduce((count, item) => count + item.get('unread_count', item.get('unread') ? 1 : 0), 0)
+    .getIn(['all_conversations', 'items'])
+    .count(item => item.get('unread'))
 );
 
-export default function conversations(state = initialState, action) {
+export default function allConversations(state = initialState, action) {
   switch (action.type) {
-  case CONVERSATIONS_FETCH_REQUEST:
+  case ALL_CONVERSATIONS_FETCH_REQUEST:
     return state.set('isLoading', true);
-  case CONVERSATIONS_FETCH_FAIL:
+  case ALL_CONVERSATIONS_FETCH_FAIL:
     return state.set('isLoading', false);
-  case CONVERSATIONS_FETCH_SUCCESS:
+  case ALL_CONVERSATIONS_FETCH_SUCCESS:
     return expandNormalizedConversations(state, action.conversations, action.next, action.isLoadingRecent);
-  case CONVERSATIONS_UPDATE:
+  case ALL_CONVERSATIONS_UPDATE:
     return updateConversation(state, action.conversation);
-  case CONVERSATIONS_MOUNT:
-    return state.update('mounted', count => count + 1);
-  case CONVERSATIONS_UNMOUNT:
-    return state.update('mounted', count => count - 1);
-  case CONVERSATIONS_READ:
+  case ALL_CONVERSATIONS_READ:
     return state.update('items', list => list.map(item => {
       if (item.get('id') === action.id) {
         return item.set('unread', false).set('unread_count', 0);
@@ -112,13 +100,6 @@ export default function conversations(state = initialState, action) {
 
       return item;
     }));
-  case blockAccountSuccess.type:
-  case muteAccountSuccess.type:
-    return filterConversations(state, [action.payload.relationship.id]);
-  case blockDomainSuccess.type:
-    return filterConversations(state, action.payload.accounts);
-  case CONVERSATIONS_DELETE_SUCCESS:
-    return state.update('items', list => list.filterNot(item => item.get('id') === action.id));
   default:
     return state;
   }

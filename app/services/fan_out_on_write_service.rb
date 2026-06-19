@@ -69,6 +69,8 @@ class FanOutOnWriteService < BaseService
   end
 
   def deliver_to_self!
+    return if @status.direct_visibility?
+
     FeedManager.instance.push_to_home(@account, @status, update: update?) if @account.local?
   end
 
@@ -136,6 +138,8 @@ class FanOutOnWriteService < BaseService
   end
 
   def deliver_to_mentioned_followers!
+    return if @status.direct_visibility?
+
     @status.mentions.joins(:account).merge(@account.followers_for_local_distribution).select(:id, :account_id).reorder(nil).find_in_batches do |mentions|
       FeedInsertWorker.push_bulk(mentions) do |mention|
         [@status.id, mention.account_id, 'home', { 'update' => update? }]

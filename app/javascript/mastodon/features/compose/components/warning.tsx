@@ -42,20 +42,7 @@ export const Warning = () => {
   }
 
   if (directMessageWarning) {
-    return (
-      <WarningMessage>
-        <FormattedMessage
-          id='compose_form.encryption_warning'
-          defaultMessage='Posts on Mastodon are not end-to-end encrypted. Do not share any dangerous information over Mastodon.'
-        />{' '}
-        <a href='/terms' target='_blank'>
-          <FormattedMessage
-            id='compose_form.direct_message_warning_learn_more'
-            defaultMessage='Learn more'
-          />
-        </a>
-      </WarningMessage>
-    );
+    return null;
   }
 
   return null;

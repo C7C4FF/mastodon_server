@@ -16,11 +16,10 @@ import { IconButton } from '@/mastodon/components/icon_button';
 import { NavigationFocusTarget } from '@/mastodon/components/navigation_focus_target';
 import { messages as privacyMessages } from '@/mastodon/features/compose/components/privacy_dropdown';
 import { createAppSelector, useAppSelector } from '@/mastodon/store';
-import AlternateEmailIcon from '@/material-icons/400-24px/alternate_email.svg?react';
 import CloseIcon from '@/material-icons/400-24px/close.svg?react';
 import LockIcon from '@/material-icons/400-24px/lock.svg?react';
+import MailIcon from '@/material-icons/400-24px/mail.svg?react';
 import PublicIcon from '@/material-icons/400-24px/public.svg?react';
-import QuietTimeIcon from '@/material-icons/400-24px/quiet_time.svg?react';
 
 import type { BaseConfirmationModalProps } from './confirmation_modals/confirmation_modal';
 
@@ -123,7 +122,9 @@ export const VisibilityModal: FC<VisibilityModalProps> = forwardRef(
       selectStatusPolicy(state, statusId),
     );
 
-    const [visibility, setVisibility] = useState(currentVisibility);
+    const [visibility, setVisibility] = useState(
+      currentVisibility === 'unlisted' ? 'public' : currentVisibility,
+    );
     const [quotePolicy, setQuotePolicy] = useState(currentQuotePolicy);
 
     const disableVisibility = !!statusId;
@@ -149,28 +150,19 @@ export const VisibilityModal: FC<VisibilityModalProps> = forwardRef(
           value: 'direct',
           text: intl.formatMessage(privacyMessages.direct_short),
           meta: intl.formatMessage(privacyMessages.direct_long),
-          icon: 'at',
-          iconComponent: AlternateEmailIcon,
+          icon: 'mail',
+          iconComponent: MailIcon,
         },
       ];
 
       if (!disablePublicVisibilities) {
-        items.unshift(
-          {
-            value: 'public',
-            text: intl.formatMessage(privacyMessages.public_short),
-            meta: intl.formatMessage(privacyMessages.public_long),
-            icon: 'globe',
-            iconComponent: PublicIcon,
-          },
-          {
-            value: 'unlisted',
-            text: intl.formatMessage(privacyMessages.unlisted_short),
-            meta: intl.formatMessage(privacyMessages.unlisted_long),
-            icon: 'unlock',
-            iconComponent: QuietTimeIcon,
-          },
-        );
+        items.unshift({
+          value: 'public',
+          text: intl.formatMessage(privacyMessages.public_short),
+          meta: intl.formatMessage(privacyMessages.public_long),
+          icon: 'globe',
+          iconComponent: PublicIcon,
+        });
       }
 
       return items;

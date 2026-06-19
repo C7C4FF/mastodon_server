@@ -15,12 +15,12 @@ class Api::V1::ConversationsController < Api::BaseController
   end
 
   def read
-    @conversation.update!(unread: false)
+    @conversation.update!(unread: false, unread_count: 0)
     render json: @conversation, serializer: REST::ConversationSerializer
   end
 
   def unread
-    @conversation.update!(unread: true)
+    @conversation.update!(unread: true, unread_count: 1)
     render json: @conversation, serializer: REST::ConversationSerializer
   end
 

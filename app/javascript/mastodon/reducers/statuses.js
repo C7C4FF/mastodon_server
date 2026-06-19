@@ -6,8 +6,10 @@ import { STATUS_IMPORT, STATUSES_IMPORT } from '../actions/importer';
 import { normalizeStatusTranslation } from '../actions/importer/normalizer';
 import {
   FAVOURITE_REQUEST,
+  FAVOURITE_SUCCESS,
   FAVOURITE_FAIL,
   UNFAVOURITE_REQUEST,
+  UNFAVOURITE_SUCCESS,
   UNFAVOURITE_FAIL,
   BOOKMARK_REQUEST,
   BOOKMARK_FAIL,
@@ -31,7 +33,23 @@ import {
 } from '../actions/statuses';
 import { setStatusQuotePolicy } from '../actions/statuses_typed';
 
-const importStatus = (state, status) => state.set(status.id, fromJS(status));
+const incrementStatusCount = (state, id, key) =>
+  state.updateIn([id, key], 0, count => Math.max(0, (Number(count) || 0) + 1));
+
+const decrementStatusCount = (state, id, key) =>
+  state.updateIn([id, key], 0, count => Math.max(0, (Number(count) || 0) - 1));
+
+const importStatus = (state, status) => {
+  const isNewReply = !state.has(status.id) && status.in_reply_to_id;
+
+  state = state.set(status.id, fromJS(status));
+
+  if (isNewReply && state.has(status.in_reply_to_id)) {
+    state = incrementStatusCount(state, status.in_reply_to_id, 'replies_count');
+  }
+
+  return state;
+};
 
 const importStatuses = (state, statuses) =>
   state.withMutations(mutable => statuses.forEach(status => importStatus(mutable, status)));
@@ -41,7 +59,16 @@ const deleteStatus = (state, id, references) => {
     state = deleteStatus(state, ref, []);
   });
 
-  return state.delete(id);
+  const parentId = state.getIn([id, 'in_reply_to_id']);
+  const shouldDecrementParentReplies = parentId && state.has(id);
+
+  state = state.delete(id);
+
+  if (shouldDecrementParentReplies && state.has(parentId)) {
+    state = decrementStatusCount(state, parentId, 'replies_count');
+  }
+
+  return state;
 };
 
 const statusTranslateSuccess = (state, id, translation) => {
@@ -69,12 +96,6 @@ const removeStatusStub = (state, id) => {
   return state.getIn([id, 'id']) ? state.deleteIn([id, 'isLoading']) : state.delete(id);
 }
 
-const incrementStatusCount = (state, id, key) =>
-  state.updateIn([id, key], 0, count => Math.max(0, (Number(count) || 0) + 1));
-
-const decrementStatusCount = (state, id, key) =>
-  state.updateIn([id, key], 0, count => Math.max(0, (Number(count) || 0) - 1));
-
 const favouriteStatus = (state, status) => {
   const id = status.get('id');
 
@@ -97,6 +118,19 @@ const unfavouriteStatus = (state, status) => {
   return state.getIn([id, 'favourited']) ?
     decrementStatusCount(state, id, 'favourites_count').setIn([id, 'favourited'], false) :
     state;
+};
+
+const syncStatusInteractionCounts = (state, status) => {
+  if (!status?.id || state.get(status.id) === undefined) {
+    return state;
+  }
+
+  return state
+    .setIn([status.id, 'favourites_count'], status.favourites_count)
+    .setIn([status.id, 'favourited'], status.favourited)
+    .setIn([status.id, 'reblogs_count'], status.reblogs_count)
+    .setIn([status.id, 'reblogged'], status.reblogged)
+    .setIn([status.id, 'replies_count'], status.replies_count);
 };
 
 const reblogStatus = (state, id) => {
@@ -158,10 +192,14 @@ export default function statuses(state = initialState, action) {
     return importStatuses(state, action.statuses);
   case FAVOURITE_REQUEST:
     return favouriteStatus(state, action.status);
+  case FAVOURITE_SUCCESS:
+    return syncStatusInteractionCounts(state, action.response);
   case FAVOURITE_FAIL:
     return unfavouriteStatus(state, action.status);
   case UNFAVOURITE_REQUEST:
     return unfavouriteStatus(state, action.status);
+  case UNFAVOURITE_SUCCESS:
+    return syncStatusInteractionCounts(state, action.response);
   case UNFAVOURITE_FAIL:
     return favouriteStatus(state, action.status);
   case BOOKMARK_REQUEST:

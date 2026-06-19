@@ -31,6 +31,7 @@ interface TimelineUpdateAction extends UnknownAction {
 interface State {
   inReplyTos: Record<string, string>;
   replies: Record<string, string[]>;
+  directMessages: Record<string, string[]>;
   pendingReplies: Record<
     string,
     Pick<ApiStatusJSON, 'id' | 'in_reply_to_id'>[]
@@ -41,6 +42,7 @@ interface State {
 const initialState: State = {
   inReplyTos: {},
   replies: {},
+  directMessages: {},
   pendingReplies: {},
   refreshing: {},
 };
@@ -82,6 +84,19 @@ const normalizeContext = (
   descendants.forEach((item) => {
     addReply(state, item);
   });
+};
+
+const normalizeDirectMessages = (
+  state: Draft<State>,
+  id: string,
+  { direct_messages }: ApiContextJSON,
+): void => {
+  if (!direct_messages) {
+    delete state.directMessages[id];
+    return;
+  }
+
+  state.directMessages[id] = direct_messages.map((item) => item.id);
 };
 
 const applyPrefetchedReplies = (state: Draft<State>, statusId: string) => {
@@ -176,6 +191,12 @@ export const contextsReducer = createReducer(initialState, (builder) => {
           action.payload.context,
         );
       } else {
+        normalizeDirectMessages(
+          state,
+          action.meta.arg.statusId,
+          action.payload.context,
+        );
+
         normalizeContext(
           state,
           action.meta.arg.statusId,

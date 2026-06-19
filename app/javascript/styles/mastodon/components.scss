@@ -8,11 +8,20 @@
 }
 
 .animated-number {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: stretch;
+  display: inline-block;
   overflow: hidden;
   position: relative;
+
+  &__current,
+  &__previous {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  &__previous {
+    inset-inline-start: 0;
+    position: absolute;
+  }
 }
 
 .inline-alert {
@@ -2726,6 +2735,7 @@ a.account__display-name {
 
 .account-switcher {
   margin-inline-start: auto;
+  position: relative;
 
   .icon {
     width: 20px;
@@ -2749,8 +2759,41 @@ a.account__display-name {
   height: 32px !important;
 }
 
+.account-switcher__dropdown {
+  position: absolute;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: 0;
+  z-index: 10000;
+
+  .dropdown-menu {
+    min-width: 292px;
+  }
+}
+
 .account-switcher__menu-item button {
   min-width: 240px;
+}
+
+.account-switcher__menu-item--account button {
+  min-width: 0;
+}
+
+.account-switcher__account-row {
+  display: flex;
+  align-items: stretch;
+  min-width: 292px;
+}
+
+.account-switcher__account-row .account-switcher__account-button {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.account-switcher__account-row .account-switcher__remove-button {
+  flex: 0 0 42px;
+  justify-content: center;
+  min-width: 0;
+  padding-inline: 10px;
 }
 
 .account-switcher__menu-item .account__avatar {
@@ -9796,6 +9839,32 @@ noscript {
     border-radius: 4px;
   }
 
+  &--signed-out {
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__signed-out-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  &__signed-out-message {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 17px;
+    line-height: 24px;
+    text-align: center;
+  }
+
+  &__signed-out-button {
+    min-width: 180px;
+  }
+
   &__footer {
     color: var(--color-text-tertiary);
     text-align: center;
@@ -10879,23 +10948,76 @@ noscript {
   background: var(--color-bg-primary);
   backdrop-filter: $backdrop-blur-filter;
   border: 1px solid var(--color-border-primary);
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 16px;
-  width: 270px;
+  width: 310px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 
   &--loading {
     position: relative;
     min-height: 100px;
   }
 
+  &__top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  &__avatar-link {
+    display: block;
+    flex: 0 0 auto;
+    text-decoration: none;
+
+    .account__avatar {
+      border-radius: 999px;
+    }
+  }
+
   &__name {
     display: flex;
-    gap: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
     text-decoration: none;
     color: inherit;
+  }
+
+  &__handle-row {
+    display: flex;
+    align-items: center;
+    max-width: 100%;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  &__handle {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--color-text-tertiary);
+    font-size: 14px;
+    line-height: 20px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__relationship-badge {
+    display: inline-flex;
+    max-width: 150px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    padding: 0 5px;
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-tertiary);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   &__numbers,
@@ -10907,9 +11029,10 @@ noscript {
   }
 
   &__numbers {
-    font-size: 15px;
-    line-height: 22px;
+    font-size: 14px;
+    line-height: 20px;
     color: var(--color-text-primary);
+    gap: 14px;
 
     strong {
       font-weight: 700;
@@ -10919,18 +11042,18 @@ noscript {
   &__text-row {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
 
   &__bio {
     color: var(--color-text-primary);
     font-size: 14px;
-    line-height: 20px;
+    line-height: 19px;
     display: -webkit-box;
     line-clamp: 2;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    max-height: 2 * 20px;
+    max-height: 2 * 19px;
     overflow: hidden;
     overflow-wrap: anywhere;
 
@@ -10975,18 +11098,28 @@ noscript {
   }
 
   .display-name {
-    font-size: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    max-width: 100%;
+    font-size: 16px;
     line-height: 22px;
 
     bdi {
-      font-weight: 500;
+      font-weight: 800;
       color: var(--color-text-primary);
     }
 
     &__account {
-      display: block;
-      color: var(--color-text-tertiary);
+      display: none;
     }
+  }
+
+  .button {
+    min-height: 36px;
+    padding: 0 16px;
+    border-radius: 999px;
+    font-weight: 800;
   }
 
   .account-fields {

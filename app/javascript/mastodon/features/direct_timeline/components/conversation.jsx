@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import MoreHorizIcon from '@/material-icons/400-24px/more_horiz.svg?react';
 import ReplyIcon from '@/material-icons/400-24px/reply.svg?react';
 import { replyCompose } from 'mastodon/actions/compose';
+import { markAllConversationRead } from 'mastodon/actions/all_conversations';
 import { markConversationRead, deleteConversation } from 'mastodon/actions/conversations';
 import { openModal } from 'mastodon/actions/modal';
 import { muteStatus, unmuteStatus, toggleStatusSpoilers } from 'mastodon/actions/statuses';
@@ -46,7 +47,7 @@ const getAccounts = createSelector(
 
 const getStatus = makeGetStatus();
 
-export const Conversation = ({ conversation, scrollKey }) => {
+export const Conversation = ({ conversation, scrollKey, adminMode }) => {
   const id = conversation.get('id');
   const unread = conversation.get('unread');
   const lastStatusId = conversation.get('last_status');
@@ -59,15 +60,15 @@ export const Conversation = ({ conversation, scrollKey }) => {
 
   const handleClick = useCallback(() => {
     if (unread) {
-      dispatch(markConversationRead(id));
+      dispatch(adminMode ? markAllConversationRead(id) : markConversationRead(id));
     }
 
-    history.push(`/@${lastStatus.getIn(['account', 'acct'])}/${lastStatus.get('id')}`);
-  }, [dispatch, history, unread, id, lastStatus]);
+    history.push(adminMode ? `/all_conversations/${lastStatus.get('id')}` : `/@${lastStatus.getIn(['account', 'acct'])}/${lastStatus.get('id')}`);
+  }, [dispatch, history, unread, adminMode, id, lastStatus]);
 
   const handleMarkAsRead = useCallback(() => {
-    dispatch(markConversationRead(id));
-  }, [dispatch, id]);
+    dispatch(adminMode ? markAllConversationRead(id) : markConversationRead(id));
+  }, [dispatch, adminMode, id]);
 
   const handleReply = useCallback(() => {
     dispatch((_, getState) => {
@@ -103,26 +104,36 @@ export const Conversation = ({ conversation, scrollKey }) => {
 
   const menu = [
     { text: intl.formatMessage(messages.open), action: handleClick },
-    null,
-    { text: intl.formatMessage(lastStatus.get('muted') ? messages.unmuteConversation : messages.muteConversation), action: handleConversationMute },
   ];
+
+  if (!adminMode) {
+    menu.push(
+      null,
+      { text: intl.formatMessage(lastStatus.get('muted') ? messages.unmuteConversation : messages.muteConversation), action: handleConversationMute }
+    );
+  }
 
   if (unread) {
     menu.push({ text: intl.formatMessage(messages.markAsRead), action: handleMarkAsRead });
     menu.push(null);
   }
 
-  menu.push({ text: intl.formatMessage(messages.delete), action: handleDelete });
+  if (!adminMode) {
+    menu.push({ text: intl.formatMessage(messages.delete), action: handleDelete });
+  }
 
   const names = accounts.map((account) => (
     <LinkedDisplayName displayProps={{account, variant: 'simple'}} key={account.get('id')} />
   )).reduce((prev, cur) => [prev, ', ', cur]);
 
   const handlers = {
-    reply: handleReply,
     open: handleClick,
     toggleHidden: handleShowMore,
   };
+
+  if (!adminMode) {
+    handlers.reply = handleReply;
+  }
 
   return (
     <Hotkeys handlers={handlers}>
@@ -158,7 +169,7 @@ export const Conversation = ({ conversation, scrollKey }) => {
           )}
 
           <div className='status__action-bar'>
-            <IconButton className='status__action-bar-button' title={intl.formatMessage(messages.reply)} icon='reply' iconComponent={ReplyIcon} onClick={handleReply} />
+            {!adminMode && <IconButton className='status__action-bar-button' title={intl.formatMessage(messages.reply)} icon='reply' iconComponent={ReplyIcon} onClick={handleReply} />}
 
             <div className='status__action-bar-dropdown'>
               <Dropdown
@@ -182,4 +193,5 @@ export const Conversation = ({ conversation, scrollKey }) => {
 Conversation.propTypes = {
   conversation: ImmutablePropTypes.map.isRequired,
   scrollKey: PropTypes.string,
+  adminMode: PropTypes.bool,
 };

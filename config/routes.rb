@@ -79,6 +79,7 @@ Rails.application.routes.draw do
       resource :challenge, only: [:create]
       resource :account_switcher, only: [:show], controller: :account_switcher do
         post :add
+        match :cancel, via: [:get, :post]
         post :logout
         post :switch
         delete :remove

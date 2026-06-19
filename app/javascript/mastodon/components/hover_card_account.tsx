@@ -12,6 +12,7 @@ import { AccountFields } from 'mastodon/components/account_fields';
 import { Avatar } from 'mastodon/components/avatar';
 import { AvatarGroup } from 'mastodon/components/avatar_group';
 import {
+  FollowingCounter,
   FollowersCounter,
   FollowersYouKnowCounter,
 } from 'mastodon/components/counters';
@@ -75,12 +76,37 @@ export const HoverCardAccount = forwardRef<
     >
       {account ? (
         <>
+          <div className='hover-card__top'>
+            <Link to={`/@${account.acct}`} className='hover-card__avatar-link'>
+              <Avatar
+                account={isSuspendedOrHidden ? undefined : account}
+                size={72}
+              />
+            </Link>
+
+            {!isSuspendedOrHidden && <FollowButton accountId={accountId} />}
+          </div>
+
           <Link to={`/@${account.acct}`} className='hover-card__name'>
-            <Avatar
-              account={isSuspendedOrHidden ? undefined : account}
-              size={46}
-            />
-            <DisplayName account={account} localDomain={domain} />
+            <DisplayName account={account} localDomain={domain} variant='noDomain' />
+            <span className='hover-card__handle-row'>
+              <span className='hover-card__handle'>@{account.acct}</span>
+              {hasRelationshipLoaded && (isMutual || isFollower) && (
+                <span className='hover-card__relationship-badge'>
+                  {isMutual ? (
+                    <FormattedMessage
+                      id='account.mutual'
+                      defaultMessage='You follow each other'
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id='account.follows_you'
+                      defaultMessage='Follows you'
+                    />
+                  )}
+                </span>
+              )}
+            </span>
           </Link>
 
           {isSuspendedOrHidden ? (
@@ -128,6 +154,10 @@ export const HoverCardAccount = forwardRef<
 
               <div className='hover-card__numbers'>
                 <ShortNumber
+                  value={account.following_count}
+                  renderer={FollowingCounter}
+                />
+                <ShortNumber
                   value={account.followers_count}
                   renderer={FollowersCounter}
                 />
@@ -151,27 +181,7 @@ export const HoverCardAccount = forwardRef<
                     </div>
                   </>
                 )}
-                {(isMutual || isFollower) && (
-                  <>
-                    &middot;
-                    <span>
-                      {isMutual ? (
-                        <FormattedMessage
-                          id='account.mutual'
-                          defaultMessage='You follow each other'
-                        />
-                      ) : (
-                        <FormattedMessage
-                          id='account.follows_you'
-                          defaultMessage='Follows you'
-                        />
-                      )}
-                    </span>
-                  </>
-                )}
               </div>
-
-              <FollowButton accountId={accountId} />
             </>
           )}
         </>

@@ -2136,10 +2136,10 @@ en:
     quote_post_author: Quoted a post by %{acct}
     title: '%{name}: "%{quote}"'
     visibilities:
-      direct: Private mention
+      direct: Direct message
       private: Followers only
-      public: Public
-      public_long: Anyone on and off Mastodon
+      public: Local
+      public_long: Everyone on this server can see it
       unlisted: Quiet public
       unlisted_long: Hidden from Mastodon search results, trending, and public timelines
   statuses_cleanup:

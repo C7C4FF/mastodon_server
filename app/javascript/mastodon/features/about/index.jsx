@@ -18,6 +18,7 @@ import { NavigationFocusTarget } from 'mastodon/components/navigation_focus_targ
 import { ServerHeroImage } from 'mastodon/components/server_hero_image';
 import { Skeleton } from 'mastodon/components/skeleton';
 import { LinkFooter} from 'mastodon/features/ui/components/link_footer';
+import { identityContextPropShape, withIdentity } from 'mastodon/identity_context';
 
 import { Section } from './components/section';
 import { RulesSection } from './components/rules';
@@ -54,6 +55,7 @@ const mapStateToProps = state => ({
 class About extends PureComponent {
 
   static propTypes = {
+    identity: identityContextPropShape,
     server: ImmutablePropTypes.map,
     locale: ImmutablePropTypes.string,
     extendedDescription: ImmutablePropTypes.map,
@@ -80,7 +82,28 @@ class About extends PureComponent {
 
   render () {
     const { multiColumn, intl, server, extendedDescription, domainBlocks, locale } = this.props;
+    const { signedIn } = this.props.identity;
     const isLoading = server.isLoading;
+
+    if (!signedIn) {
+      return (
+        <Column bindToDocument={!multiColumn} label={intl.formatMessage(messages.title)}>
+          <div className='scrollable about about--signed-out' id={getColumnSkipLinkId(1)}>
+            <NavigationFocusTarget as='div' className='about__signed-out-content'>
+              <p className='about__signed-out-message'>서버의 유저가 아니면 접근할 수 없습니다.</p>
+              <a href='/auth/sign_in' className='button about__signed-out-button'>
+                <FormattedMessage id='sign_in_banner.sign_in' defaultMessage='Login' />
+              </a>
+            </NavigationFocusTarget>
+          </div>
+
+          <Helmet>
+            <title>{intl.formatMessage(messages.title)}</title>
+            <meta name='robots' content='noindex' />
+          </Helmet>
+        </Column>
+      );
+    }
 
     return (
       <Column bindToDocument={!multiColumn} label={intl.formatMessage(messages.title)}>
@@ -97,7 +120,7 @@ class About extends PureComponent {
             <NavigationFocusTarget as='h1'>
               {isLoading ? <Skeleton width='10ch' /> : domain}
             </NavigationFocusTarget>
-            <p><FormattedMessage id='about.powered_by' defaultMessage='Decentralized social media powered by {mastodon}' values={{ mastodon: <a href='https://joinmastodon.org' className='about__mail' target='_blank' rel='noopener'>Mastodon</a> }} /></p>
+            <p><FormattedMessage id='about.c7c4ff_commissioned' defaultMessage='C7C4FF 커미션으로 운영되는 비공개 {mastodon} 서버' values={{ mastodon: <a href='https://joinmastodon.org' className='about__mail' target='_blank' rel='noopener'>Mastodon</a> }} /></p>
           </div>
 
           <div className='about__meta'>
@@ -187,4 +210,4 @@ class About extends PureComponent {
 
 }
 
-export default connect(mapStateToProps)(injectIntl(About));
+export default connect(mapStateToProps)(withIdentity(injectIntl(About)));

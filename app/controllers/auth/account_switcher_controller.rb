@@ -4,6 +4,7 @@ class Auth::AccountSwitcherController < ApplicationController
   include AccountSwitcherConcern
 
   before_action :authenticate_user!
+  skip_before_action :authenticate_user!, only: :cancel
 
   def show
     remember_switchable_account(current_user)
@@ -11,14 +12,28 @@ class Auth::AccountSwitcherController < ApplicationController
   end
 
   def add
-    remember_switchable_account(current_user)
-    sign_out(:user)
+    start_switchable_account_add(current_user)
 
     respond_with_redirect(new_user_session_path(account_switcher: 'add'))
   end
 
+  def cancel
+    return_user = switchable_account_return_user
+    stop_switchable_account_add
+
+    if return_user&.functional?
+      sign_in(:user, return_user)
+      remember_switchable_account(return_user)
+
+      respond_with_redirect('/web/home')
+    else
+      respond_with_redirect(new_user_session_path)
+    end
+  end
+
   def switch
     remember_switchable_account(current_user)
+    stop_switchable_account_add
 
     target_user = switchable_account_users.find { |user| user.account_id.to_s == account_id_param }
 

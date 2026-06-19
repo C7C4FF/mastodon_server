@@ -7,7 +7,8 @@ import { Helmet } from '@unhead/react/helmet';
 
 import { useDispatch } from 'react-redux';
 
-import AlternateEmailIcon from '@/material-icons/400-24px/alternate_email.svg?react';
+import MailIcon from '@/material-icons/400-24px/mail.svg?react';
+import { expandAllConversations } from 'mastodon/actions/all_conversations';
 import { addColumn, removeColumn, moveColumn } from 'mastodon/actions/columns';
 import { mountConversations, unmountConversations, expandConversations } from 'mastodon/actions/conversations';
 import { connectDirectStream } from 'mastodon/actions/streaming';
@@ -17,14 +18,16 @@ import ColumnHeader from 'mastodon/components/column_header';
 import { ConversationsList } from './components/conversations_list';
 
 const messages = defineMessages({
-  title: { id: 'column.direct', defaultMessage: 'Private mentions' },
+  title: { id: 'column.direct', defaultMessage: 'Direct messages' },
+  allTitle: { id: 'column.all_direct', defaultMessage: 'All DMs' },
 });
 
-const DirectTimeline = ({ columnId, multiColumn }) => {
+const DirectTimeline = ({ columnId, multiColumn, allConversations }) => {
   const columnRef = useRef();
   const intl = useIntl();
   const dispatch = useDispatch();
   const pinned = !!columnId;
+  const title = intl.formatMessage(allConversations ? messages.allTitle : messages.title);
 
   const handlePin = useCallback(() => {
     if (columnId) {
@@ -43,6 +46,12 @@ const DirectTimeline = ({ columnId, multiColumn }) => {
   }, [columnRef]);
 
   useEffect(() => {
+    if (allConversations) {
+      dispatch(expandAllConversations());
+
+      return () => {};
+    }
+
     dispatch(mountConversations());
     dispatch(expandConversations());
 
@@ -52,32 +61,36 @@ const DirectTimeline = ({ columnId, multiColumn }) => {
       dispatch(unmountConversations());
       disconnect();
     };
-  }, [dispatch]);
+  }, [dispatch, allConversations]);
 
   return (
-    <Column bindToDocument={!multiColumn} ref={columnRef} label={intl.formatMessage(messages.title)}>
+    <Column bindToDocument={!multiColumn} ref={columnRef} label={title}>
       <ColumnHeader
-        icon='at'
-        iconComponent={AlternateEmailIcon}
-        title={intl.formatMessage(messages.title)}
+        icon='mail'
+        iconComponent={MailIcon}
+        title={title}
         onPin={handlePin}
         onMove={handleMove}
         onClick={handleHeaderClick}
         pinned={pinned}
         multiColumn={multiColumn}
+        hideCollapseButton
       />
 
       <ConversationsList
+        storeKey={allConversations ? 'all_conversations' : 'conversations'}
+        expandAction={allConversations ? expandAllConversations : expandConversations}
+        adminMode={allConversations}
         trackScroll={!pinned}
         scrollKey={`direct_timeline-${columnId}`}
-        emptyMessage={<FormattedMessage id='empty_column.direct' defaultMessage="You don't have any private mentions yet. When you send or receive one, it will show up here." />}
+        emptyMessage={<FormattedMessage id='empty_column.direct' defaultMessage="You don't have any direct messages yet. When you send or receive one, it will show up here." />}
         bindToDocument={!multiColumn}
-        prepend={<div className='follow_requests-unlocked_explanation'><span><FormattedMessage id='compose_form.encryption_warning' defaultMessage='Posts on Mastodon are not end-to-end encrypted. Do not share any dangerous information over Mastodon.' /> <a href='/terms' target='_blank'><FormattedMessage id='compose_form.direct_message_warning_learn_more' defaultMessage='Learn more' /></a></span></div>}
+        prepend={<div className='follow_requests-unlocked_explanation direct-timeline__warning'><span><FormattedMessage id='compose_form.encryption_warning' defaultMessage='Posts on Mastodon are not end-to-end encrypted. Do not share any dangerous information over Mastodon.' /> <a href='/terms' target='_blank'><FormattedMessage id='compose_form.direct_message_warning_learn_more' defaultMessage='Learn more' /></a></span></div>}
         alwaysPrepend
       />
 
       <Helmet>
-        <title>{intl.formatMessage(messages.title)}</title>
+        <title>{title}</title>
         <meta name='robots' content='noindex' />
       </Helmet>
     </Column>
@@ -87,6 +100,7 @@ const DirectTimeline = ({ columnId, multiColumn }) => {
 DirectTimeline.propTypes = {
   columnId: PropTypes.string,
   multiColumn: PropTypes.bool,
+  allConversations: PropTypes.bool,
 };
 
 export default DirectTimeline;

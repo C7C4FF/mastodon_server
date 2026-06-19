@@ -5,6 +5,8 @@ class AccountStatusesFilter
     pinned
     tagged
     only_media
+    exclude_direct
+    exclude_mentions
     exclude_replies
     exclude_reblogs
   ).freeze
@@ -22,6 +24,7 @@ class AccountStatusesFilter
 
     scope.merge!(pinned_scope)     if pinned?
     scope.merge!(only_media_scope) if only_media?
+    scope.merge!(no_mentions_scope) if exclude_mentions?
     scope.merge!(no_replies_scope) if exclude_replies?
     scope.merge!(no_reblogs_scope) if exclude_reblogs?
     scope.merge!(hashtag_scope)    if tagged?
@@ -83,6 +86,10 @@ class AccountStatusesFilter
     Status.without_replies
   end
 
+  def no_mentions_scope
+    Status.left_outer_joins(:mentions).where(mentions: { id: nil })
+  end
+
   def no_reblogs_scope
     Status.without_reblogs
   end
@@ -135,6 +142,10 @@ class AccountStatusesFilter
 
   def exclude_replies?
     truthy_param?(:exclude_replies)
+  end
+
+  def exclude_mentions?
+    truthy_param?(:exclude_mentions)
   end
 
   def exclude_reblogs?

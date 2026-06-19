@@ -47,6 +47,7 @@ RSpec.describe AccountStatusesFilter do
       status_with_parent!(:public)
       status_with_reblog!(:public)
       status_with_tag!(:public, tag)
+      status_with_mention!(:public)
       status_with_mention!(:direct)
       status_with_media_attachment!(:public)
     end
@@ -67,6 +68,9 @@ RSpec.describe AccountStatusesFilter do
 
         expect(results_for(exclude_direct: true))
           .to all(satisfy { |status| !status.direct_visibility? })
+
+        expect(results_for(exclude_mentions: true))
+          .to all(satisfy { |status| status.mentions.empty? })
       end
 
       def results_for(params)

@@ -87,6 +87,7 @@ export interface Props {
   placeholder?: boolean;
   appendContent?: React.ReactNode;
   collapseIssues?: boolean;
+  hideCollapseButton?: boolean;
   onClick?: () => void;
   onMove?: (arg0: number) => void;
   onPin?: () => void;
@@ -106,6 +107,7 @@ export const ColumnHeader: React.FC<Props> = ({
   placeholder,
   appendContent,
   collapseIssues,
+  hideCollapseButton,
   onClick,
   onMove,
   onPin,
@@ -241,7 +243,7 @@ export const ColumnHeader: React.FC<Props> = ({
     );
   }
 
-  if (signedIn && (children || (multiColumn && onPin))) {
+  if (!hideCollapseButton && signedIn && (children || (multiColumn && onPin))) {
     collapseButton = (
       <button
         className={collapsibleButtonClassName}

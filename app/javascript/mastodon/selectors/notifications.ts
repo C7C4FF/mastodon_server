@@ -16,8 +16,37 @@ const filterNotificationsByAllowedTypes = (
   allowedType: string,
   excludedTypes: string[],
   notifications: (NotificationGroup | NotificationGap)[],
+  statuses: RootState['statuses'],
 ) => {
-  if (!showFilterBar || allowedType === 'all') {
+  allowedType = ['all', 'mention'].includes(allowedType)
+    ? allowedType
+    : 'all';
+
+  const isDirectMention = (item: NotificationGroup) => {
+    if (item.type !== 'mention' || !('statusId' in item) || !item.statusId) {
+      return false;
+    }
+
+    return statuses.get(item.statusId)?.get('visibility') === 'direct';
+  };
+
+  if (allowedType === 'all') {
+    return notifications.filter(
+      (item) =>
+        item.type === 'gap' ||
+        !isDirectMention(item),
+    );
+  }
+
+  if (allowedType === 'mention') {
+    return notifications.filter(
+      (item) =>
+        item.type === 'gap' ||
+        (item.type === 'mention' && !isDirectMention(item)),
+    );
+  }
+
+  if (!showFilterBar) {
     // used if user changed the notification settings after loading the notifications from the server
     // otherwise a list of notifications will come pre-filtered from the backend
     // we need to turn it off for FilterBar in order not to block ourselves from seeing a specific category
@@ -42,6 +71,7 @@ export const selectNotificationGroups = createSelector(
     selectSettingsNotificationsQuickFilterActive,
     selectSettingsNotificationsExcludedTypes,
     (state: RootState) => state.notificationGroups.groups,
+    (state: RootState) => state.statuses,
   ],
   filterNotificationsByAllowedTypes,
 );
@@ -52,6 +82,7 @@ const selectPendingNotificationGroups = createSelector(
     selectSettingsNotificationsQuickFilterActive,
     selectSettingsNotificationsExcludedTypes,
     (state: RootState) => state.notificationGroups.pendingGroups,
+    (state: RootState) => state.statuses,
   ],
   filterNotificationsByAllowedTypes,
 );

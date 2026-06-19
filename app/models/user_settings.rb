@@ -46,7 +46,7 @@ class UserSettings
     setting :follow, default: true
     setting :reblog, default: false
     setting :favourite, default: false
-    setting :mention, default: true
+    setting :mention, default: false
     setting :quote, default: true
     setting :follow_request, default: true
     setting :report, default: true

@@ -23,26 +23,19 @@ export const AccountTabs: FC = () => {
     return <hr className={classes.noTabs} />;
   }
 
-  const { acct, show_featured, show_media } = account;
-  if (!show_featured && !show_media) {
-    return <hr className={classes.noTabs} />;
-  }
+  const { acct } = account;
 
   return (
     <TabList>
       <TabLink isActive={isActive} to={`/@${acct}`}>
-        <FormattedMessage id='account.activity' defaultMessage='Activity' />
+        <FormattedMessage id='account.posts' defaultMessage='Posts' />
       </TabLink>
-      {show_media && (
-        <TabLink exact to={`/@${acct}/media`}>
-          <FormattedMessage id='account.media' defaultMessage='Media' />
-        </TabLink>
-      )}
-      {show_featured && (
-        <TabLink exact to={`/@${acct}/featured`}>
-          <FormattedMessage id='account.featured' defaultMessage='Featured' />
-        </TabLink>
-      )}
+      <TabLink exact to={`/@${acct}/with_replies`}>
+        <FormattedMessage id='account.posts_with_replies' defaultMessage='Replies' />
+      </TabLink>
+      <TabLink exact to={`/@${acct}/media`}>
+        <FormattedMessage id='account.media' defaultMessage='Media' />
+      </TabLink>
     </TabList>
   );
 };

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_11_150940) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_20_002000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -31,7 +31,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_11_150940) do
     t.bigint "participant_account_ids", default: [], null: false, array: true
     t.bigint "status_ids", default: [], null: false, array: true
     t.boolean "unread", default: false, null: false
-    t.index ["account_id", "conversation_id", "participant_account_ids"], name: "index_unique_conversations", unique: true
+    t.integer "unread_count", default: 0, null: false
+    t.index ["account_id", "conversation_id"], name: "index_account_conversations_on_account_id_and_conversation_id", unique: true
     t.index ["conversation_id"], name: "index_account_conversations_on_conversation_id"
   end
 
@@ -233,6 +234,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_11_150940) do
     t.datetime "updated_at", precision: nil, null: false
     t.index ["account_id"], name: "index_admin_action_logs_on_account_id"
     t.index ["target_type", "target_id"], name: "index_admin_action_logs_on_target_type_and_target_id"
+  end
+
+  create_table "admin_direct_message_reads", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.bigint "conversation_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "last_status_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "conversation_id"], name: "idx_on_account_id_conversation_id_4ad5d03c36", unique: true
   end
 
   create_table "announcement_mutes", force: :cascade do |t|
@@ -1473,6 +1483,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_11_150940) do
   add_foreign_key "account_warnings", "reports", on_delete: :cascade
   add_foreign_key "accounts", "accounts", column: "moved_to_account_id", on_delete: :nullify
   add_foreign_key "admin_action_logs", "accounts", on_delete: :cascade
+  add_foreign_key "admin_direct_message_reads", "accounts", on_delete: :cascade
+  add_foreign_key "admin_direct_message_reads", "conversations", on_delete: :cascade
+  add_foreign_key "admin_direct_message_reads", "statuses", column: "last_status_id", on_delete: :cascade
   add_foreign_key "announcement_mutes", "accounts", on_delete: :cascade
   add_foreign_key "announcement_mutes", "announcements", on_delete: :cascade
   add_foreign_key "announcement_reactions", "accounts", on_delete: :cascade

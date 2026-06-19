@@ -7,7 +7,7 @@ import classNames from 'classnames';
 import ImmutablePropTypes from 'react-immutable-proptypes';
 import ImmutablePureComponent from 'react-immutable-pure-component';
 
-import AlternateEmailIcon from '@/material-icons/400-24px/alternate_email.svg?react';
+import MailIcon from '@/material-icons/400-24px/mail.svg?react';
 import RepeatIcon from '@/material-icons/400-24px/repeat.svg?react';
 import { Hotkeys } from 'mastodon/components/hotkeys';
 import { ContentWarning } from 'mastodon/components/content_warning';
@@ -22,7 +22,7 @@ import Card from '../features/status/components/card';
 import Bundle from '../features/ui/components/bundle';
 import { MediaGallery, Video, Audio } from '../features/ui/util/async-components';
 import { SensitiveMediaContext } from '../features/ui/util/sensitive_media_context';
-import { displayMedia } from '../initial_state';
+import { displayMedia, me } from '../initial_state';
 
 import { injectIntl } from './intl';
 import { StatusHeader } from './status/header'
@@ -449,7 +449,7 @@ class Status extends ImmutablePureComponent {
     } else if (status.get('visibility') === 'direct') {
       prepend = (
         <div className='status__prepend'>
-          <div className='status__prepend__icon'><Icon id='at' icon={AlternateEmailIcon} /></div>
+          <div className='status__prepend__icon'><Icon id='mail' icon={MailIcon} /></div>
           <FormattedMessage id='status.direct_indicator' defaultMessage='Private mention' tagName='span' />
         </div>
       );
@@ -591,7 +591,7 @@ class Status extends ImmutablePureComponent {
 
     return (
       <Hotkeys handlers={handlers} focusable={!unfocusable}>
-        <div className={classNames('status__wrapper', `status__wrapper-${status.get('visibility')}`, { 'status__wrapper-reply': !!status.get('in_reply_to_id'), unread, focusable: !this.props.muted })} tabIndex={this.props.muted || unfocusable ? null : 0} data-featured={featured ? 'true' : null} aria-label={textForScreenReader({intl, status, rebloggedByText, isQuote: isQuotedPost})} ref={this.handleRef} data-nosnippet={status.getIn(['account', 'noindex'], true) || undefined}>
+        <div className={classNames('status__wrapper', `status__wrapper-${status.get('visibility')}`, { 'status__wrapper-reply': !!status.get('in_reply_to_id'), 'status__wrapper-own': status.getIn(['account', 'id']) === me, unread, focusable: !this.props.muted })} tabIndex={this.props.muted || unfocusable ? null : 0} data-featured={featured ? 'true' : null} aria-label={textForScreenReader({intl, status, rebloggedByText, isQuote: isQuotedPost})} ref={this.handleRef} data-nosnippet={status.getIn(['account', 'noindex'], true) || undefined}>
           {!skipPrepend && prepend}
 
           <div

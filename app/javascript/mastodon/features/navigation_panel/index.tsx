@@ -9,11 +9,12 @@ import { animated, useSpring } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
 
 import AddIcon from '@/material-icons/400-24px/add.svg?react';
-import AlternateEmailIcon from '@/material-icons/400-24px/alternate_email.svg?react';
 import BookmarksActiveIcon from '@/material-icons/400-24px/bookmarks-fill.svg?react';
 import BookmarksIcon from '@/material-icons/400-24px/bookmarks.svg?react';
 import HomeActiveIcon from '@/material-icons/400-24px/home-fill.svg?react';
 import HomeIcon from '@/material-icons/400-24px/home.svg?react';
+import MailActiveIcon from '@/material-icons/400-24px/mail-fill.svg?react';
+import MailIcon from '@/material-icons/400-24px/mail.svg?react';
 import NotificationsActiveIcon from '@/material-icons/400-24px/notifications-fill.svg?react';
 import NotificationsIcon from '@/material-icons/400-24px/notifications.svg?react';
 import PersonAddIcon from '@/material-icons/400-24px/person_add.svg?react';
@@ -32,6 +33,9 @@ import { useBreakpoint } from 'mastodon/features/ui/hooks/useBreakpoint';
 import { useIdentity } from 'mastodon/identity_context';
 import { me } from 'mastodon/initial_state';
 import { transientSingleColumn } from 'mastodon/is_mobile';
+import { canManageReports } from 'mastodon/permissions';
+import { selectUnreadAllConversationsCount } from 'mastodon/reducers/all_conversations';
+import { selectUnreadConversationsCount } from 'mastodon/reducers/conversations';
 import { selectUnreadNotificationGroupsCount } from 'mastodon/selectors/notifications';
 import { useAppSelector, useAppDispatch } from 'mastodon/store';
 
@@ -56,7 +60,8 @@ const messages = defineMessages({
     id: 'navigation_bar.live_feed_local',
     defaultMessage: 'Local timeline',
   },
-  direct: { id: 'navigation_bar.direct', defaultMessage: 'DM' },
+  direct: { id: 'navigation_bar.direct', defaultMessage: 'Direct messages' },
+  allDirect: { id: 'navigation_bar.all_direct', defaultMessage: 'All DMs' },
   favourites: { id: 'navigation_bar.favourites', defaultMessage: 'Favorites' },
   bookmarks: { id: 'navigation_bar.bookmarks', defaultMessage: 'Bookmarks' },
   followRequests: {
@@ -109,6 +114,72 @@ const NotificationsLink = () => {
   );
 };
 
+const DirectLink = () => {
+  const count = useAppSelector((state) => {
+    const unreadCount = selectUnreadConversationsCount(state) as unknown;
+
+    return typeof unreadCount === 'number' ? unreadCount : 0;
+  });
+  const intl = useIntl();
+
+  return (
+    <ColumnLink
+      transparent
+      to='/conversations'
+      icon={
+        <IconWithBadge
+          id='mail'
+          icon={MailIcon}
+          count={count}
+          className='column-link__icon'
+        />
+      }
+      activeIcon={
+        <IconWithBadge
+          id='mail'
+          icon={MailActiveIcon}
+          count={count}
+          className='column-link__icon'
+        />
+      }
+      text={intl.formatMessage(messages.direct)}
+    />
+  );
+};
+
+const AllDirectLink = () => {
+  const count = useAppSelector((state) => {
+    const unreadCount = selectUnreadAllConversationsCount(state) as unknown;
+
+    return typeof unreadCount === 'number' ? unreadCount : 0;
+  });
+  const intl = useIntl();
+
+  return (
+    <ColumnLink
+      transparent
+      to='/all_conversations'
+      icon={
+        <IconWithBadge
+          id='mail'
+          icon={MailIcon}
+          count={count}
+          className='column-link__icon'
+        />
+      }
+      activeIcon={
+        <IconWithBadge
+          id='mail'
+          icon={MailActiveIcon}
+          count={count}
+          className='column-link__icon'
+        />
+      }
+      text={intl.formatMessage(messages.allDirect)}
+    />
+  );
+};
+
 const ProfileCard: React.FC = () => {
   if (!me) {
     return null;
@@ -132,7 +203,7 @@ export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
   multiColumn = false,
 }) => {
   const intl = useIntl();
-  const { signedIn, disabledAccountId } = useIdentity();
+  const { signedIn, disabledAccountId, permissions } = useIdentity();
   const location = useLocation();
   const showSearch = useBreakpoint('full') && !multiColumn;
 
@@ -240,14 +311,14 @@ export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
             </li>
 
             <li>
-              <ColumnLink
-                transparent
-                to='/conversations'
-                icon='at'
-                iconComponent={AlternateEmailIcon}
-                text={intl.formatMessage(messages.direct)}
-              />
+              <DirectLink />
             </li>
+
+            {canManageReports(permissions) && (
+              <li>
+                <AllDirectLink />
+              </li>
+            )}
 
             <li>
               <ColumnLink
