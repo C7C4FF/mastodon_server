@@ -4384,10 +4384,12 @@ body .compose-form .compose-form__uploads {
 }
 
 /* Private mentions icon */
+.layout-multiple-columns .column-link .icon-mail,
 .layout-multiple-columns .column-link .icon-at {
   background-image: var(--icon-direct-messages);
 }
 
+.layout-multiple-columns .column-link.active .icon-mail,
 .layout-multiple-columns .column-link.active .icon-at {
   background-image: var(--icon-direct-messages-active);
   transform: scale(1.15);

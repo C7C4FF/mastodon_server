@@ -36,9 +36,7 @@ export const FilterBar: React.FC = () => {
   const selectedFilterValue = useAppSelector(
     selectSettingsNotificationsQuickFilterActive,
   );
-  const selectedFilter = ['all', 'mention', 'direct'].includes(
-    selectedFilterValue,
-  )
+  const selectedFilter = ['all', 'mention'].includes(selectedFilterValue)
     ? selectedFilterValue
     : 'all';
 
@@ -52,9 +50,6 @@ export const FilterBar: React.FC = () => {
           id='notifications.filter.mentions'
           defaultMessage='Mentions'
         />
-      </BarButton>
-      <BarButton selectedFilter={selectedFilter} type='direct' key='direct'>
-        <FormattedMessage id='notifications.filter.direct' defaultMessage='DM' />
       </BarButton>
     </div>
   );

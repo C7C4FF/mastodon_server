@@ -9,11 +9,12 @@ import { animated, useSpring } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
 
 import AddIcon from '@/material-icons/400-24px/add.svg?react';
-import AlternateEmailIcon from '@/material-icons/400-24px/alternate_email.svg?react';
 import BookmarksActiveIcon from '@/material-icons/400-24px/bookmarks-fill.svg?react';
 import BookmarksIcon from '@/material-icons/400-24px/bookmarks.svg?react';
 import HomeActiveIcon from '@/material-icons/400-24px/home-fill.svg?react';
 import HomeIcon from '@/material-icons/400-24px/home.svg?react';
+import MailActiveIcon from '@/material-icons/400-24px/mail-fill.svg?react';
+import MailIcon from '@/material-icons/400-24px/mail.svg?react';
 import NotificationsActiveIcon from '@/material-icons/400-24px/notifications-fill.svg?react';
 import NotificationsIcon from '@/material-icons/400-24px/notifications.svg?react';
 import PersonAddIcon from '@/material-icons/400-24px/person_add.svg?react';
@@ -33,6 +34,7 @@ import { useIdentity } from 'mastodon/identity_context';
 import { me } from 'mastodon/initial_state';
 import { transientSingleColumn } from 'mastodon/is_mobile';
 import { canManageReports } from 'mastodon/permissions';
+import { selectUnreadConversationsCount } from 'mastodon/reducers/conversations';
 import { selectUnreadNotificationGroupsCount } from 'mastodon/selectors/notifications';
 import { useAppSelector, useAppDispatch } from 'mastodon/store';
 
@@ -107,6 +109,39 @@ const NotificationsLink = () => {
         />
       }
       text={intl.formatMessage(messages.notifications)}
+    />
+  );
+};
+
+const DirectLink = () => {
+  const count = useAppSelector((state) => {
+    const unreadCount = selectUnreadConversationsCount(state) as unknown;
+
+    return typeof unreadCount === 'number' ? unreadCount : 0;
+  });
+  const intl = useIntl();
+
+  return (
+    <ColumnLink
+      transparent
+      to='/conversations'
+      icon={
+        <IconWithBadge
+          id='mail'
+          icon={MailIcon}
+          count={count}
+          className='column-link__icon'
+        />
+      }
+      activeIcon={
+        <IconWithBadge
+          id='mail'
+          icon={MailActiveIcon}
+          count={count}
+          className='column-link__icon'
+        />
+      }
+      text={intl.formatMessage(messages.direct)}
     />
   );
 };
@@ -242,13 +277,7 @@ export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
             </li>
 
             <li>
-              <ColumnLink
-                transparent
-                to='/conversations'
-                icon='at'
-                iconComponent={AlternateEmailIcon}
-                text={intl.formatMessage(messages.direct)}
-              />
+              <DirectLink />
             </li>
 
             {canManageReports(permissions) && (
@@ -256,8 +285,8 @@ export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
                 <ColumnLink
                   transparent
                   to='/all_conversations'
-                  icon='at'
-                  iconComponent={AlternateEmailIcon}
+                  icon='mail'
+                  iconComponent={MailIcon}
                   text={intl.formatMessage(messages.allDirect)}
                 />
               </li>

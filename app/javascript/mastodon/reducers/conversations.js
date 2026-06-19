@@ -83,6 +83,10 @@ const filterConversations = (state, accountIds) => {
   return state.update('items', list => list.filterNot(item => item.get('accounts').some(accountId => accountIds.includes(accountId))));
 };
 
+export const selectUnreadConversationsCount = state => (
+  state.getIn(['conversations', 'items']).count(item => item.get('unread'))
+);
+
 export default function conversations(state = initialState, action) {
   switch (action.type) {
   case CONVERSATIONS_FETCH_REQUEST:

@@ -4630,10 +4630,12 @@ body .navigation-panel__legal .column-link[href='/about'] svg {
 }
 
 /* Private mentions icon */
+.layout-single-column .column-link .icon-mail,
 .layout-single-column .column-link .icon-at {
   background-image: var(--icon-direct-messages);
 }
 
+.layout-single-column .column-link.active .icon-mail,
 .layout-single-column .column-link.active .icon-at {
   background-image: var(--icon-direct-messages-active);
   transform: scale(1.15);

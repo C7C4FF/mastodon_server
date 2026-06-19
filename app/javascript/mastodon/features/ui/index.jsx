@@ -26,6 +26,7 @@ import { WithRouterPropTypes } from 'mastodon/utils/react_router';
 import { checkAnnualReport } from '@/mastodon/reducers/slices/annual_report';
 
 import { uploadCompose, resetCompose, changeComposeSpoilerness } from '../../actions/compose';
+import { expandConversations } from '../../actions/conversations';
 import { clearHeight } from '../../actions/height_cache';
 import { fetchServer, fetchServerTranslationLanguages } from '../../actions/server';
 import { expandHomeTimeline } from '../../actions/timelines';
@@ -440,6 +441,7 @@ class UI extends PureComponent {
     if (signedIn) {
       this.props.dispatch(fetchMarkers());
       this.props.dispatch(expandHomeTimeline());
+      this.props.dispatch(expandConversations());
       this.props.dispatch(fetchNotifications());
       this.props.dispatch(fetchServerTranslationLanguages());
       this.props.dispatch(checkAnnualReport());

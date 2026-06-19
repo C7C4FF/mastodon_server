@@ -18,7 +18,7 @@ const filterNotificationsByAllowedTypes = (
   notifications: (NotificationGroup | NotificationGap)[],
   statuses: RootState['statuses'],
 ) => {
-  allowedType = ['all', 'mention', 'direct'].includes(allowedType)
+  allowedType = ['all', 'mention'].includes(allowedType)
     ? allowedType
     : 'all';
 
@@ -32,7 +32,9 @@ const filterNotificationsByAllowedTypes = (
 
   if (allowedType === 'all') {
     return notifications.filter(
-      (item) => item.type === 'gap' || item.type === 'mention',
+      (item) =>
+        item.type === 'gap' ||
+        !isDirectMention(item),
     );
   }
 
@@ -41,14 +43,6 @@ const filterNotificationsByAllowedTypes = (
       (item) =>
         item.type === 'gap' ||
         (item.type === 'mention' && !isDirectMention(item)),
-    );
-  }
-
-  if (allowedType === 'direct') {
-    return notifications.filter(
-      (item) =>
-        item.type === 'gap' ||
-        (item.type === 'mention' && isDirectMention(item)),
     );
   }
 

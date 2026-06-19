@@ -54,14 +54,10 @@ function notificationTypeForQuickFilter(type: NotificationType) {
 }
 
 function normalizeQuickFilter(filter: string) {
-  return ['all', 'mention', 'direct'].includes(filter) ? filter : 'all';
+  return ['all', 'mention'].includes(filter) ? filter : 'all';
 }
 
 function excludeAllTypesExcept(filter: string) {
-  if (filter === 'direct') {
-    filter = 'mention';
-  }
-
   return allNotificationTypes.filter(
     (item) => notificationTypeForQuickFilter(item) !== filter,
   );
@@ -72,7 +68,11 @@ function getExcludedTypes(state: RootState) {
     selectSettingsNotificationsQuickFilterActive(state),
   );
 
-  return ['all', 'mention', 'direct'].includes(activeFilter)
+  if (activeFilter === 'all') {
+    return selectSettingsNotificationsExcludedTypes(state);
+  }
+
+  return activeFilter === 'mention'
     ? excludeAllTypesExcept('mention')
     : selectSettingsNotificationsExcludedTypes(state);
 }
@@ -86,11 +86,9 @@ function notificationMatchesQuickFilter(
 
   switch (activeFilter) {
     case 'all':
-      return isMention;
+      return !isDirect;
     case 'mention':
       return isMention && !isDirect;
-    case 'direct':
-      return isDirect;
     default:
       return activeFilter === notificationTypeForQuickFilter(notification.type);
   }
@@ -216,10 +214,13 @@ export const processNewNotificationForGroups = createAppAsyncThunk(
       selectSettingsNotificationsQuickFilterActive(state),
     );
     const notificationShows = selectSettingsNotificationsShows(state);
+    const isDirect =
+      notification.type === 'mention' &&
+      notification.status?.visibility === 'direct';
 
     const showInColumn =
       activeFilter === 'all'
-        ? notification.type === 'mention' &&
+        ? !isDirect &&
           notificationShows[notificationTypeForFilter(notification.type)] !==
             false
         : notificationMatchesQuickFilter(notification, activeFilter);
