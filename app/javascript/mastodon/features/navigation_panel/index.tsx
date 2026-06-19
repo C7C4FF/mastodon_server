@@ -34,6 +34,7 @@ import { useIdentity } from 'mastodon/identity_context';
 import { me } from 'mastodon/initial_state';
 import { transientSingleColumn } from 'mastodon/is_mobile';
 import { canManageReports } from 'mastodon/permissions';
+import { selectUnreadAllConversationsCount } from 'mastodon/reducers/all_conversations';
 import { selectUnreadConversationsCount } from 'mastodon/reducers/conversations';
 import { selectUnreadNotificationGroupsCount } from 'mastodon/selectors/notifications';
 import { useAppSelector, useAppDispatch } from 'mastodon/store';
@@ -142,6 +143,39 @@ const DirectLink = () => {
         />
       }
       text={intl.formatMessage(messages.direct)}
+    />
+  );
+};
+
+const AllDirectLink = () => {
+  const count = useAppSelector((state) => {
+    const unreadCount = selectUnreadAllConversationsCount(state) as unknown;
+
+    return typeof unreadCount === 'number' ? unreadCount : 0;
+  });
+  const intl = useIntl();
+
+  return (
+    <ColumnLink
+      transparent
+      to='/all_conversations'
+      icon={
+        <IconWithBadge
+          id='mail'
+          icon={MailIcon}
+          count={count}
+          className='column-link__icon'
+        />
+      }
+      activeIcon={
+        <IconWithBadge
+          id='mail'
+          icon={MailActiveIcon}
+          count={count}
+          className='column-link__icon'
+        />
+      }
+      text={intl.formatMessage(messages.allDirect)}
     />
   );
 };
@@ -282,13 +316,7 @@ export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
 
             {canManageReports(permissions) && (
               <li>
-                <ColumnLink
-                  transparent
-                  to='/all_conversations'
-                  icon='mail'
-                  iconComponent={MailIcon}
-                  text={intl.formatMessage(messages.allDirect)}
-                />
+                <AllDirectLink />
               </li>
             )}
 

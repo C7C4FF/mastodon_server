@@ -298,7 +298,11 @@ namespace :api, format: false do
         end
       end
 
-      resources :direct_messages, only: [:index]
+      resources :direct_messages, only: [:index] do
+        member do
+          post :read
+        end
+      end
 
       resources :domain_allows, only: [:index, :show, :create, :destroy]
       resources :domain_blocks, only: [:index, :show, :update, :create, :destroy]

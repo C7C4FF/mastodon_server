@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import MoreHorizIcon from '@/material-icons/400-24px/more_horiz.svg?react';
 import ReplyIcon from '@/material-icons/400-24px/reply.svg?react';
 import { replyCompose } from 'mastodon/actions/compose';
+import { markAllConversationRead } from 'mastodon/actions/all_conversations';
 import { markConversationRead, deleteConversation } from 'mastodon/actions/conversations';
 import { openModal } from 'mastodon/actions/modal';
 import { muteStatus, unmuteStatus, toggleStatusSpoilers } from 'mastodon/actions/statuses';
@@ -58,16 +59,16 @@ export const Conversation = ({ conversation, scrollKey, adminMode }) => {
   const accounts = useSelector(state => getAccounts(state, accountIds));
 
   const handleClick = useCallback(() => {
-    if (unread && !adminMode) {
-      dispatch(markConversationRead(id));
+    if (unread) {
+      dispatch(adminMode ? markAllConversationRead(id) : markConversationRead(id));
     }
 
     history.push(adminMode ? `/all_conversations/${lastStatus.get('id')}` : `/@${lastStatus.getIn(['account', 'acct'])}/${lastStatus.get('id')}`);
   }, [dispatch, history, unread, adminMode, id, lastStatus]);
 
   const handleMarkAsRead = useCallback(() => {
-    dispatch(markConversationRead(id));
-  }, [dispatch, id]);
+    dispatch(adminMode ? markAllConversationRead(id) : markConversationRead(id));
+  }, [dispatch, adminMode, id]);
 
   const handleReply = useCallback(() => {
     dispatch((_, getState) => {
@@ -112,7 +113,7 @@ export const Conversation = ({ conversation, scrollKey, adminMode }) => {
     );
   }
 
-  if (unread && !adminMode) {
+  if (unread) {
     menu.push({ text: intl.formatMessage(messages.markAsRead), action: handleMarkAsRead });
     menu.push(null);
   }

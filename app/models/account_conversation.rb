@@ -9,6 +9,7 @@
 #  participant_account_ids :bigint(8)        default([]), not null, is an Array
 #  status_ids              :bigint(8)        default([]), not null, is an Array
 #  unread                  :boolean          default(FALSE), not null
+#  unread_count            :integer          default(0), not null
 #  account_id              :bigint(8)        not null
 #  conversation_id         :bigint(8)        not null
 #  last_status_id          :bigint(8)
@@ -78,7 +79,13 @@ class AccountConversation < ApplicationRecord
 
       conversation.participant_account_ids |= participants_from_status(recipient, status)
       conversation.status_ids << status.id
-      conversation.unread = status.account_id != recipient.id
+      if status.account_id == recipient.id
+        conversation.unread = false
+        conversation.unread_count = 0
+      else
+        conversation.unread = true
+        conversation.unread_count = conversation.unread_count.to_i + 1
+      end
       conversation.save
       conversation
     rescue ActiveRecord::StaleObjectError

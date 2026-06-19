@@ -12,6 +12,7 @@ import { debounce } from 'lodash';
 
 import { scrollRight } from '../../scroll';
 import { focusApp, unfocusApp, changeLayout } from 'mastodon/actions/app';
+import { expandAllConversations } from 'mastodon/actions/all_conversations';
 import { synchronouslySubmitMarkers, submitMarkers, fetchMarkers } from 'mastodon/actions/markers';
 import { fetchNotifications } from 'mastodon/actions/notification_groups';
 import { INTRODUCTION_VERSION } from 'mastodon/actions/onboarding';
@@ -22,6 +23,7 @@ import { HoverCardController } from 'mastodon/components/hover_card_controller';
 import { PictureInPicture } from 'mastodon/features/picture_in_picture';
 import { identityContextPropShape, withIdentity } from 'mastodon/identity_context';
 import { layoutFromWindow } from 'mastodon/is_mobile';
+import { canManageReports } from 'mastodon/permissions';
 import { WithRouterPropTypes } from 'mastodon/utils/react_router';
 import { checkAnnualReport } from '@/mastodon/reducers/slices/annual_report';
 
@@ -422,7 +424,7 @@ class UI extends PureComponent {
   }
 
   componentDidMount () {
-    const { signedIn } = this.props.identity;
+    const { signedIn, permissions } = this.props.identity;
 
     window.addEventListener('focus', this.handleWindowFocus, false);
     window.addEventListener('blur', this.handleWindowBlur, false);
@@ -442,6 +444,9 @@ class UI extends PureComponent {
       this.props.dispatch(fetchMarkers());
       this.props.dispatch(expandHomeTimeline());
       this.props.dispatch(expandConversations());
+      if (canManageReports(permissions)) {
+        this.props.dispatch(expandAllConversations());
+      }
       this.props.dispatch(fetchNotifications());
       this.props.dispatch(fetchServerTranslationLanguages());
       this.props.dispatch(checkAnnualReport());

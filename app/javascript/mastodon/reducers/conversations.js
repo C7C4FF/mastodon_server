@@ -25,6 +25,7 @@ const initialState = ImmutableMap({
 const conversationToMap = item => ImmutableMap({
   id: item.id,
   unread: item.unread,
+  unread_count: item.unread_count ?? (item.unread ? 1 : 0),
   accounts: ImmutableList(item.accounts.map(a => a.id)),
   last_status: item.last_status ? item.last_status.id : null,
 });
@@ -84,7 +85,9 @@ const filterConversations = (state, accountIds) => {
 };
 
 export const selectUnreadConversationsCount = state => (
-  state.getIn(['conversations', 'items']).count(item => item.get('unread'))
+  state
+    .getIn(['conversations', 'items'])
+    .reduce((count, item) => count + item.get('unread_count', item.get('unread') ? 1 : 0), 0)
 );
 
 export default function conversations(state = initialState, action) {
@@ -104,7 +107,7 @@ export default function conversations(state = initialState, action) {
   case CONVERSATIONS_READ:
     return state.update('items', list => list.map(item => {
       if (item.get('id') === action.id) {
-        return item.set('unread', false);
+        return item.set('unread', false).set('unread_count', 0);
       }
 
       return item;

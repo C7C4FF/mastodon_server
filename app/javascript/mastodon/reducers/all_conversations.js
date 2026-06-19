@@ -4,6 +4,8 @@ import {
   ALL_CONVERSATIONS_FETCH_REQUEST,
   ALL_CONVERSATIONS_FETCH_SUCCESS,
   ALL_CONVERSATIONS_FETCH_FAIL,
+  ALL_CONVERSATIONS_UPDATE,
+  ALL_CONVERSATIONS_READ,
 } from '../actions/all_conversations';
 import { compareId } from '../compare_id';
 
@@ -16,9 +18,24 @@ const initialState = ImmutableMap({
 const conversationToMap = item => ImmutableMap({
   id: item.id,
   unread: item.unread,
+  unread_count: item.unread_count ?? (item.unread ? 1 : 0),
   accounts: ImmutableList(item.accounts.map(a => a.id)),
   last_status: item.last_status ? item.last_status.id : null,
 });
+
+const updateConversation = (state, item) => {
+  const newItem = conversationToMap(item);
+
+  return state.update('items', list => {
+    const itemIndex = list.findIndex(x => x.get('id') === newItem.get('id'));
+
+    if (itemIndex > -1) {
+      list = list.delete(itemIndex);
+    }
+
+    return list.unshift(newItem);
+  });
+};
 
 const expandNormalizedConversations = (state, conversations, next, isLoadingRecent) => {
   let items = ImmutableList(conversations.map(conversationToMap));
@@ -59,6 +76,12 @@ const expandNormalizedConversations = (state, conversations, next, isLoadingRece
   });
 };
 
+export const selectUnreadAllConversationsCount = state => (
+  state
+    .getIn(['all_conversations', 'items'])
+    .count(item => item.get('unread'))
+);
+
 export default function allConversations(state = initialState, action) {
   switch (action.type) {
   case ALL_CONVERSATIONS_FETCH_REQUEST:
@@ -67,6 +90,16 @@ export default function allConversations(state = initialState, action) {
     return state.set('isLoading', false);
   case ALL_CONVERSATIONS_FETCH_SUCCESS:
     return expandNormalizedConversations(state, action.conversations, action.next, action.isLoadingRecent);
+  case ALL_CONVERSATIONS_UPDATE:
+    return updateConversation(state, action.conversation);
+  case ALL_CONVERSATIONS_READ:
+    return state.update('items', list => list.map(item => {
+      if (item.get('id') === action.id) {
+        return item.set('unread', false).set('unread_count', 0);
+      }
+
+      return item;
+    }));
   default:
     return state;
   }
