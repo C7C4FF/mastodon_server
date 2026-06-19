@@ -33,9 +33,10 @@ module AccountSwitcherConcern
   def remember_switchable_account(user)
     return unless user&.account_id
 
-    session[SWITCHABLE_ACCOUNT_IDS_SESSION_KEY] = switchable_account_user_ids
-      .push(user.id)
-      .uniq
+    session[SWITCHABLE_ACCOUNT_IDS_SESSION_KEY] = [
+      user.id,
+      *(switchable_account_user_ids - [user.id]),
+    ]
   end
 
   def forget_switchable_account(user)
