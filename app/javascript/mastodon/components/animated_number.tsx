@@ -52,7 +52,6 @@ export const AnimatedNumber: React.FC<Props> = ({
       immediate: false,
       onRest() {
         setPreviousValue(value);
-        setIsAnimating(false);
       },
     });
 
