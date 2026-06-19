@@ -35,6 +35,8 @@
 
     .actions
       = f.button :button, t('auth.login'), type: :submit
+      - if adding_switchable_account?
+        = link_to '취소', cancel_auth_account_switcher_path, class: 'button button-secondary'
 
 - if devise_mapping.omniauthable? && resource_class.omniauth_providers.any?
   .simple_form.alternative-login

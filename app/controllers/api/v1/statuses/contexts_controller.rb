@@ -31,13 +31,21 @@ class Api::V1::Statuses::ContextsController < Api::BaseController
       descendants_depth_limit = DESCENDANTS_DEPTH_LIMIT
     end
 
-    ancestors_results   = @status.in_reply_to_id.nil? ? [] : @status.ancestors(ancestors_limit, current_account)
-    descendants_results = @status.descendants(descendants_limit, current_account, descendants_depth_limit)
-    loaded_ancestors    = preload_collection(ancestors_results, Status)
-    loaded_descendants  = preload_collection(descendants_results, Status)
+    if @status.direct_visibility? && @status.conversation_id.present?
+      direct_message_ids = Status.where(conversation_id: @status.conversation_id).direct_visibility.reorder(created_at: :asc, id: :asc).pluck(:id)
+      loaded_direct_messages = preload_collection(Status.permitted_statuses_from_ids(direct_message_ids, current_account, stable: true), Status)
 
-    @context = Context.new(ancestors: loaded_ancestors, descendants: loaded_descendants)
-    statuses = [@status] + @context.ancestors + @context.descendants
+      @context = Context.new(ancestors: [], descendants: [], direct_messages: loaded_direct_messages)
+      statuses = @context.direct_messages
+    else
+      ancestors_results   = @status.in_reply_to_id.nil? ? [] : @status.ancestors(ancestors_limit, current_account)
+      descendants_results = @status.descendants(descendants_limit, current_account, descendants_depth_limit)
+      loaded_ancestors    = preload_collection(ancestors_results, Status)
+      loaded_descendants  = preload_collection(descendants_results, Status)
+
+      @context = Context.new(ancestors: loaded_ancestors, descendants: loaded_descendants, direct_messages: [])
+      statuses = [@status] + @context.ancestors + @context.descendants
+    end
 
     refresh_key = "context:#{@status.id}:refresh"
     async_refresh = AsyncRefresh.new(refresh_key)

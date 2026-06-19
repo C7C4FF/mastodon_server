@@ -11,7 +11,7 @@ import { FormattedMessage } from 'react-intl';
 import classNames from 'classnames';
 import { Link } from 'react-router-dom';
 
-import AlternateEmailIcon from '@/material-icons/400-24px/alternate_email.svg?react';
+import MailIcon from '@/material-icons/400-24px/mail.svg?react';
 import { Avatar } from 'mastodon/components/avatar';
 import { ContentWarning } from 'mastodon/components/content_warning';
 import { DisplayName } from 'mastodon/components/display_name';
@@ -340,8 +340,8 @@ export const DetailedStatus: React.FC<{
           <div className='status__prepend'>
             <div className='status__prepend-icon-wrapper'>
               <Icon
-                id='at'
-                icon={AlternateEmailIcon}
+                id='mail'
+                icon={MailIcon}
                 className='status__prepend-icon'
               />
             </div>

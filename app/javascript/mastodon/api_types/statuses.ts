@@ -128,6 +128,7 @@ export interface ApiStatusJSON {
 export interface ApiContextJSON {
   ancestors: ApiStatusJSON[];
   descendants: ApiStatusJSON[];
+  direct_messages?: ApiStatusJSON[];
 }
 
 export interface ApiStatusSourceJSON {

@@ -7,6 +7,7 @@ import { accountsReducer } from './accounts';
 import { accountsFamiliarFollowersReducer } from './accounts_familiar_followers';
 import { accountsMapReducer } from './accounts_map';
 import { alertsReducer } from './alerts';
+import all_conversations from './all_conversations';
 import announcements from './announcements';
 import { composeReducer } from './compose';
 import { contextsReducer } from './contexts';
@@ -47,6 +48,7 @@ const reducers = {
   timelines,
   meta,
   alerts: alertsReducer,
+  all_conversations,
   loadingBar: loadingBarReducer,
   modal: modalReducer,
   user_lists,

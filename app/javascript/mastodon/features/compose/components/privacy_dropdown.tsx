@@ -8,18 +8,17 @@ import type { OverlayProps } from 'react-overlays/Overlay';
 import Overlay from 'react-overlays/Overlay';
 
 import type { StatusVisibility } from '@/mastodon/api_types/statuses';
-import AlternateEmailIcon from '@/material-icons/400-24px/alternate_email.svg?react';
 import LockIcon from '@/material-icons/400-24px/lock.svg?react';
+import MailIcon from '@/material-icons/400-24px/mail.svg?react';
 import PublicIcon from '@/material-icons/400-24px/public.svg?react';
-import QuietTimeIcon from '@/material-icons/400-24px/quiet_time.svg?react';
 import { DropdownSelector } from 'mastodon/components/dropdown_selector';
 import { Icon } from 'mastodon/components/icon';
 
 export const messages = defineMessages({
-  public_short: { id: 'privacy.public.short', defaultMessage: 'Public' },
+  public_short: { id: 'privacy.public.short', defaultMessage: 'Local' },
   public_long: {
     id: 'privacy.public.long',
-    defaultMessage: 'Anyone on and off Mastodon',
+    defaultMessage: 'Everyone on this server can see it',
   },
   unlisted_short: {
     id: 'privacy.unlisted.short',
@@ -30,18 +29,21 @@ export const messages = defineMessages({
     defaultMessage:
       'Hidden from Mastodon search results, trending, and public timelines',
   },
-  private_short: { id: 'privacy.private.short', defaultMessage: 'Followers' },
+  private_short: {
+    id: 'privacy.private.short',
+    defaultMessage: 'Followers only',
+  },
   private_long: {
     id: 'privacy.private.long',
-    defaultMessage: 'Only your followers',
+    defaultMessage: 'Only people who follow you can see it',
   },
   direct_short: {
     id: 'privacy.direct.short',
-    defaultMessage: 'Specific people',
+    defaultMessage: 'Direct message',
   },
   direct_long: {
     id: 'privacy.direct.long',
-    defaultMessage: 'Everyone mentioned in the post',
+    defaultMessage: 'Only mentioned users can see it',
   },
   change_privacy: {
     id: 'privacy.change',
@@ -112,14 +114,6 @@ const PrivacyDropdown: React.FC<PrivacyDropdownProps> = ({
       meta: intl.formatMessage(messages.public_long),
     },
     {
-      icon: 'unlock',
-      iconComponent: QuietTimeIcon,
-      value: 'unlisted',
-      text: intl.formatMessage(messages.unlisted_short),
-      meta: intl.formatMessage(messages.unlisted_long),
-      extra: intl.formatMessage(messages.unlisted_extra),
-    },
-    {
       icon: 'lock',
       iconComponent: LockIcon,
       value: 'private',
@@ -130,8 +124,8 @@ const PrivacyDropdown: React.FC<PrivacyDropdownProps> = ({
 
   if (!noDirect) {
     options.push({
-      icon: 'at',
-      iconComponent: AlternateEmailIcon,
+      icon: 'mail',
+      iconComponent: MailIcon,
       value: 'direct',
       text: intl.formatMessage(messages.direct_short),
       meta: intl.formatMessage(messages.direct_long),

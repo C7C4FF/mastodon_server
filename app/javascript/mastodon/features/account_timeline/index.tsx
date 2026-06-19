@@ -13,6 +13,7 @@ import {
   timelineKey,
 } from '@/mastodon/actions/timelines_typed';
 import { AccountHeader } from '@/mastodon/components/account_header';
+import { AccountTabs } from '@/mastodon/components/account_header/tabs';
 import { Column } from '@/mastodon/components/column';
 import type { ColumnRef } from '@/mastodon/components/column';
 import { ColumnBackButton } from '@/mastodon/components/column_back_button';
@@ -32,12 +33,10 @@ import { selectTimelineByKey } from '@/mastodon/selectors/timelines';
 import { useAppDispatch, useAppSelector } from '@/mastodon/store';
 
 import { FeaturedTags } from './components/featured_tags';
-import { AccountFilters } from './components/filters';
 import { renderPinnedStatusHeader } from './components/pinned_statuses';
 import { TagSuggestions } from './components/tags_suggestions';
 import {
   AccountTimelineContext,
-  useAccountContext,
   useAccountContextValue,
 } from './hooks/useAccountContext';
 import { usePinnedStatusIds } from './hooks/usePinned';
@@ -45,7 +44,10 @@ import classes from './styles.module.scss';
 
 const emptyList = ImmutableList<string>();
 
-const AccountTimeline: FC<{ multiColumn: boolean }> = ({ multiColumn }) => {
+const AccountTimeline: FC<{ multiColumn: boolean; withReplies?: boolean }> = ({
+  multiColumn,
+  withReplies = false,
+}) => {
   const accountId = useAccountId();
   const accountContext = useAccountContextValue(accountId);
 
@@ -67,25 +69,26 @@ const AccountTimeline: FC<{ multiColumn: boolean }> = ({ multiColumn }) => {
     <AccountTimelineContext.Provider value={accountContext}>
       <InnerTimeline
         accountId={accountId}
-        key={accountId}
+        key={`${accountId}-${withReplies ? 'replies' : 'posts'}`}
         multiColumn={multiColumn}
+        withReplies={withReplies}
       />
     </AccountTimelineContext.Provider>
   );
 };
 
-const InnerTimeline: FC<{ accountId: string; multiColumn: boolean }> = ({
-  accountId,
-  multiColumn,
-}) => {
+const InnerTimeline: FC<{
+  accountId: string;
+  multiColumn: boolean;
+  withReplies: boolean;
+}> = ({ accountId, multiColumn, withReplies }) => {
   const { tagged } = useParams<{ tagged?: string }>();
-  const { boosts, replies } = useAccountContext();
   const key = timelineKey({
     type: 'account',
     userId: accountId,
     tagged,
-    boosts,
-    replies,
+    boosts: false,
+    replies: withReplies,
   });
 
   const timeline = useAppSelector((state) => selectTimelineByKey(state, key));
@@ -172,7 +175,7 @@ const Prepend: FC<{
   return (
     <>
       <AccountHeader accountId={accountId} hideTabs />
-      <AccountFilters />
+      <AccountTabs />
       <FeaturedTags accountId={accountId} />
       {me === accountId && <TagSuggestions />}
     </>

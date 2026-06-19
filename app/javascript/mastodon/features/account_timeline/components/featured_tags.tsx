@@ -13,7 +13,6 @@ import { useOverflowButton } from '@/mastodon/hooks/useOverflow';
 import { selectAccountFeaturedTags } from '@/mastodon/selectors/accounts';
 import { useAppDispatch, useAppSelector } from '@/mastodon/store';
 
-import { useAccountContext } from '../hooks/useAccountContext';
 import classes from '../styles.module.scss';
 
 export const FeaturedTags: FC<{ accountId: string }> = ({ accountId }) => {
@@ -80,10 +79,8 @@ export const FeaturedTags: FC<{ accountId: string }> = ({ accountId }) => {
 };
 
 function useTagNavigate() {
-  // Get current account, tag, and filters.
+  // Get current account and tag.
   const { acct, tagged } = useParams<{ acct: string; tagged?: string }>();
-  const { boosts, replies } = useAccountContext();
-
   const history = useAppHistory();
 
   const handleTagClick: MouseEventHandler<HTMLButtonElement> = useCallback(
@@ -99,21 +96,9 @@ function useTagNavigate() {
         url = `/@${acct}`;
       }
 
-      // Append filters.
-      const params = new URLSearchParams();
-      if (boosts) {
-        params.append('boosts', '1');
-      }
-      if (replies) {
-        params.append('replies', '1');
-      }
-
-      history.push({
-        pathname: url,
-        search: params.toString(),
-      });
+      history.push(url);
     },
-    [acct, tagged, boosts, replies, history],
+    [acct, tagged, history],
   );
 
   return {

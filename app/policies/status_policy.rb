@@ -3,6 +3,7 @@
 class StatusPolicy < ApplicationPolicy
   def show?
     return false if author.unavailable?
+    return true if staff_can_view_direct_messages?
 
     if requires_mention?
       owned? || mention_exists?
@@ -39,6 +40,10 @@ class StatusPolicy < ApplicationPolicy
 
   def requires_mention?
     record.direct_visibility? || record.limited_visibility?
+  end
+
+  def staff_can_view_direct_messages?
+    requires_mention? && role.can?(:manage_reports)
   end
 
   def owned?

@@ -10,17 +10,17 @@ import ScrollableList from 'mastodon/components/scrollable_list';
 
 import { Conversation } from './conversation';
 
-export const ConversationsList = ({ scrollKey, ...other }) => {
+export const ConversationsList = ({ scrollKey, storeKey, expandAction, adminMode, ...other }) => {
   const listRef = useRef();
-  const conversations = useSelector(state => state.getIn(['conversations', 'items']));
-  const isLoading = useSelector(state => state.getIn(['conversations', 'isLoading'], true));
-  const hasMore = useSelector(state => state.getIn(['conversations', 'hasMore'], false));
+  const conversations = useSelector(state => state.getIn([storeKey, 'items']));
+  const isLoading = useSelector(state => state.getIn([storeKey, 'isLoading'], true));
+  const hasMore = useSelector(state => state.getIn([storeKey, 'hasMore'], false));
   const dispatch = useDispatch();
   const lastStatusId = conversations.last()?.get('last_status');
 
   const debouncedLoadMore = useMemo(() => debounce(id => {
-    dispatch(expandConversations({ maxId: id }));
-  }, 300, { leading: true }), [dispatch]);
+    dispatch(expandAction({ maxId: id }));
+  }, 300, { leading: true }), [dispatch, expandAction]);
 
   const handleLoadMore = useCallback(() => {
     if (lastStatusId) {
@@ -35,6 +35,7 @@ export const ConversationsList = ({ scrollKey, ...other }) => {
           key={item.get('id')}
           conversation={item}
           scrollKey={scrollKey}
+          adminMode={adminMode}
         />
       ))}
     </ScrollableList>
@@ -43,4 +44,13 @@ export const ConversationsList = ({ scrollKey, ...other }) => {
 
 ConversationsList.propTypes = {
   scrollKey: PropTypes.string.isRequired,
+  storeKey: PropTypes.string,
+  expandAction: PropTypes.func,
+  adminMode: PropTypes.bool,
+};
+
+ConversationsList.defaultProps = {
+  storeKey: 'conversations',
+  expandAction: expandConversations,
+  adminMode: false,
 };

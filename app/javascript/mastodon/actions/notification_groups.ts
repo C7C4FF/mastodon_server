@@ -53,18 +53,47 @@ function notificationTypeForQuickFilter(type: NotificationType) {
   }
 }
 
+function normalizeQuickFilter(filter: string) {
+  return ['all', 'mention', 'direct'].includes(filter) ? filter : 'all';
+}
+
 function excludeAllTypesExcept(filter: string) {
+  if (filter === 'direct') {
+    filter = 'mention';
+  }
+
   return allNotificationTypes.filter(
     (item) => notificationTypeForQuickFilter(item) !== filter,
   );
 }
 
 function getExcludedTypes(state: RootState) {
-  const activeFilter = selectSettingsNotificationsQuickFilterActive(state);
+  const activeFilter = normalizeQuickFilter(
+    selectSettingsNotificationsQuickFilterActive(state),
+  );
 
-  return activeFilter === 'all'
-    ? selectSettingsNotificationsExcludedTypes(state)
-    : excludeAllTypesExcept(activeFilter);
+  return ['all', 'mention', 'direct'].includes(activeFilter)
+    ? excludeAllTypesExcept('mention')
+    : selectSettingsNotificationsExcludedTypes(state);
+}
+
+function notificationMatchesQuickFilter(
+  notification: ApiNotificationJSON,
+  activeFilter: string,
+) {
+  const isMention = notification.type === 'mention';
+  const isDirect = isMention && notification.status?.visibility === 'direct';
+
+  switch (activeFilter) {
+    case 'all':
+      return isMention;
+    case 'mention':
+      return isMention && !isDirect;
+    case 'direct':
+      return isDirect;
+    default:
+      return activeFilter === notificationTypeForQuickFilter(notification.type);
+  }
 }
 
 function dispatchAssociatedRecords(
@@ -183,14 +212,17 @@ export const processNewNotificationForGroups = createAppAsyncThunk(
   'notificationGroups/processNew',
   (notification: ApiNotificationJSON, { dispatch, getState }) => {
     const state = getState();
-    const activeFilter = selectSettingsNotificationsQuickFilterActive(state);
+    const activeFilter = normalizeQuickFilter(
+      selectSettingsNotificationsQuickFilterActive(state),
+    );
     const notificationShows = selectSettingsNotificationsShows(state);
 
     const showInColumn =
       activeFilter === 'all'
-        ? notificationShows[notificationTypeForFilter(notification.type)] !==
-          false
-        : activeFilter === notificationTypeForQuickFilter(notification.type);
+        ? notification.type === 'mention' &&
+          notificationShows[notificationTypeForFilter(notification.type)] !==
+            false
+        : notificationMatchesQuickFilter(notification, activeFilter);
 
     if (!showInColumn) return;
 

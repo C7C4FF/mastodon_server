@@ -6,6 +6,7 @@
 
 %w(
   /blocks
+  /all_conversations/(*any)
   /bookmarks
   /collections/(*any)
   /conversations

@@ -34,6 +34,10 @@ export function DirectTimeline() {
   return import('../../direct_timeline');
 }
 
+export function AllDirectTimeline() {
+  return import('../../all_direct_timeline');
+}
+
 export function ListTimeline () {
   return import('../../list_timeline');
 }

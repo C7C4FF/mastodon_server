@@ -32,6 +32,7 @@ import { useBreakpoint } from 'mastodon/features/ui/hooks/useBreakpoint';
 import { useIdentity } from 'mastodon/identity_context';
 import { me } from 'mastodon/initial_state';
 import { transientSingleColumn } from 'mastodon/is_mobile';
+import { canManageReports } from 'mastodon/permissions';
 import { selectUnreadNotificationGroupsCount } from 'mastodon/selectors/notifications';
 import { useAppSelector, useAppDispatch } from 'mastodon/store';
 
@@ -56,7 +57,8 @@ const messages = defineMessages({
     id: 'navigation_bar.live_feed_local',
     defaultMessage: 'Local timeline',
   },
-  direct: { id: 'navigation_bar.direct', defaultMessage: 'DM' },
+  direct: { id: 'navigation_bar.direct', defaultMessage: 'Direct messages' },
+  allDirect: { id: 'navigation_bar.all_direct', defaultMessage: 'All DMs' },
   favourites: { id: 'navigation_bar.favourites', defaultMessage: 'Favorites' },
   bookmarks: { id: 'navigation_bar.bookmarks', defaultMessage: 'Bookmarks' },
   followRequests: {
@@ -132,7 +134,7 @@ export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
   multiColumn = false,
 }) => {
   const intl = useIntl();
-  const { signedIn, disabledAccountId } = useIdentity();
+  const { signedIn, disabledAccountId, permissions } = useIdentity();
   const location = useLocation();
   const showSearch = useBreakpoint('full') && !multiColumn;
 
@@ -248,6 +250,18 @@ export const NavigationPanel: React.FC<{ multiColumn?: boolean }> = ({
                 text={intl.formatMessage(messages.direct)}
               />
             </li>
+
+            {canManageReports(permissions) && (
+              <li>
+                <ColumnLink
+                  transparent
+                  to='/all_conversations'
+                  icon='at'
+                  iconComponent={AlternateEmailIcon}
+                  text={intl.formatMessage(messages.allDirect)}
+                />
+              </li>
+            )}
 
             <li>
               <ColumnLink

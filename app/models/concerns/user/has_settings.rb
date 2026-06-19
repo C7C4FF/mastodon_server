@@ -120,7 +120,10 @@ module User::HasSettings
   end
 
   def setting_default_privacy
-    settings['default_privacy'] || (account.locked? ? 'private' : 'public')
+    default_privacy = settings['default_privacy']
+    return 'public' if default_privacy == 'unlisted'
+
+    default_privacy || (account.locked? ? 'private' : 'public')
   end
 
   def setting_default_quote_policy

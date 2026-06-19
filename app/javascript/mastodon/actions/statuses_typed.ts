@@ -12,7 +12,9 @@ export const fetchContext = createDataLoadingThunk(
   ({ statusId }: { statusId: string; prefetchOnly?: boolean }) =>
     apiGetContext(statusId),
   ({ context, refresh }, { dispatch, actionArg: { prefetchOnly = false } }) => {
-    const statuses = context.ancestors.concat(context.descendants);
+    const statuses = context.ancestors
+      .concat(context.descendants)
+      .concat(context.direct_messages ?? []);
 
     dispatch(importFetchedStatuses(statuses));
 

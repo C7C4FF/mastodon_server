@@ -2061,10 +2061,10 @@ ko:
     quote_post_author: 인용된 %{acct} 님의 게시물
     title: '%{name}: "%{quote}"'
     visibilities:
-      direct: 개인 멘션
-      private: 팔로워만
-      public: 공개
-      public_long: 마스토돈 내외 모두
+      direct: 다이렉트 메세지
+      private: 팔로워 전용
+      public: 로컬
+      public_long: 이 서버의 모든 사람이 볼 수 있습니다.
       unlisted: 조용한 공개
       unlisted_long: 마스토돈 검색결과, 유행, 공개 타임라인에서 숨기기
   statuses_cleanup:

@@ -46,7 +46,7 @@ const getAccounts = createSelector(
 
 const getStatus = makeGetStatus();
 
-export const Conversation = ({ conversation, scrollKey }) => {
+export const Conversation = ({ conversation, scrollKey, adminMode }) => {
   const id = conversation.get('id');
   const unread = conversation.get('unread');
   const lastStatusId = conversation.get('last_status');
@@ -58,12 +58,12 @@ export const Conversation = ({ conversation, scrollKey }) => {
   const accounts = useSelector(state => getAccounts(state, accountIds));
 
   const handleClick = useCallback(() => {
-    if (unread) {
+    if (unread && !adminMode) {
       dispatch(markConversationRead(id));
     }
 
-    history.push(`/@${lastStatus.getIn(['account', 'acct'])}/${lastStatus.get('id')}`);
-  }, [dispatch, history, unread, id, lastStatus]);
+    history.push(adminMode ? `/all_conversations/${lastStatus.get('id')}` : `/@${lastStatus.getIn(['account', 'acct'])}/${lastStatus.get('id')}`);
+  }, [dispatch, history, unread, adminMode, id, lastStatus]);
 
   const handleMarkAsRead = useCallback(() => {
     dispatch(markConversationRead(id));
@@ -103,26 +103,36 @@ export const Conversation = ({ conversation, scrollKey }) => {
 
   const menu = [
     { text: intl.formatMessage(messages.open), action: handleClick },
-    null,
-    { text: intl.formatMessage(lastStatus.get('muted') ? messages.unmuteConversation : messages.muteConversation), action: handleConversationMute },
   ];
 
-  if (unread) {
+  if (!adminMode) {
+    menu.push(
+      null,
+      { text: intl.formatMessage(lastStatus.get('muted') ? messages.unmuteConversation : messages.muteConversation), action: handleConversationMute }
+    );
+  }
+
+  if (unread && !adminMode) {
     menu.push({ text: intl.formatMessage(messages.markAsRead), action: handleMarkAsRead });
     menu.push(null);
   }
 
-  menu.push({ text: intl.formatMessage(messages.delete), action: handleDelete });
+  if (!adminMode) {
+    menu.push({ text: intl.formatMessage(messages.delete), action: handleDelete });
+  }
 
   const names = accounts.map((account) => (
     <LinkedDisplayName displayProps={{account, variant: 'simple'}} key={account.get('id')} />
   )).reduce((prev, cur) => [prev, ', ', cur]);
 
   const handlers = {
-    reply: handleReply,
     open: handleClick,
     toggleHidden: handleShowMore,
   };
+
+  if (!adminMode) {
+    handlers.reply = handleReply;
+  }
 
   return (
     <Hotkeys handlers={handlers}>
@@ -158,7 +168,7 @@ export const Conversation = ({ conversation, scrollKey }) => {
           )}
 
           <div className='status__action-bar'>
-            <IconButton className='status__action-bar-button' title={intl.formatMessage(messages.reply)} icon='reply' iconComponent={ReplyIcon} onClick={handleReply} />
+            {!adminMode && <IconButton className='status__action-bar-button' title={intl.formatMessage(messages.reply)} icon='reply' iconComponent={ReplyIcon} onClick={handleReply} />}
 
             <div className='status__action-bar-dropdown'>
               <Dropdown
@@ -182,4 +192,5 @@ export const Conversation = ({ conversation, scrollKey }) => {
 Conversation.propTypes = {
   conversation: ImmutablePropTypes.map.isRequired,
   scrollKey: PropTypes.string,
+  adminMode: PropTypes.bool,
 };
