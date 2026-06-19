@@ -205,6 +205,8 @@ class SwitchingColumnsArea extends PureComponent {
             <WrappedRoute path='/privacy-policy' component={PrivacyPolicy} content={children} />
             <WrappedRoute path='/terms-of-service/:date?' component={TermsOfService} content={children} />
 
+            {!signedIn && <Redirect from='/home' to={rootRedirect} exact />}
+            {!signedIn && <Redirect from='/timelines/home' to={rootRedirect} exact />}
             <WrappedRoute path={['/home', '/timelines/home']} component={HomeTimeline} content={children} />
             <Redirect from='/timelines/public' to='/public' exact />
             <Redirect from='/timelines/public/local' to='/public/local' exact />
