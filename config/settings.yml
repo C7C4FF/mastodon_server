@@ -7,7 +7,7 @@ defaults: &defaults
   site_description: ''
   site_extended_description: ''
   site_terms: ''
-  site_contact_username: ''
+  site_contact_username: 'C7C4FF'
   site_contact_email: ''
   registrations_mode: 'none'
   profile_directory: false
