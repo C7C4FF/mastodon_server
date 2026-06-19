@@ -74,6 +74,7 @@ const DirectTimeline = ({ columnId, multiColumn, allConversations }) => {
         onClick={handleHeaderClick}
         pinned={pinned}
         multiColumn={multiColumn}
+        hideCollapseButton
       />
 
       <ConversationsList
