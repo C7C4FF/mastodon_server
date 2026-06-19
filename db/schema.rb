@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_11_150940) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_20_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -31,7 +31,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_11_150940) do
     t.bigint "participant_account_ids", default: [], null: false, array: true
     t.bigint "status_ids", default: [], null: false, array: true
     t.boolean "unread", default: false, null: false
-    t.index ["account_id", "conversation_id", "participant_account_ids"], name: "index_unique_conversations", unique: true
+    t.index ["account_id", "conversation_id"], name: "index_account_conversations_on_account_id_and_conversation_id", unique: true
     t.index ["conversation_id"], name: "index_account_conversations_on_conversation_id"
   end
 
