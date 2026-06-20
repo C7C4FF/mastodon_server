@@ -267,6 +267,15 @@ export const AccountSwitcher: React.FC = () => {
     setOpen(false);
   }, []);
 
+  const handleBackdropClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (event.target === event.currentTarget) {
+        handleClose();
+      }
+    },
+    [handleClose],
+  );
+
   const handleToggle = useCallback(() => {
     setOpen((wasOpen) => {
       if (!wasOpen) {
@@ -347,7 +356,11 @@ export const AccountSwitcher: React.FC = () => {
       />
 
       {open && (
-        <div className='account-switcher__dropdown' id={menuId}>
+        <div
+          className='account-switcher__dropdown'
+          id={menuId}
+          onClick={handleBackdropClick}
+        >
           <div className='dropdown-animation dropdown-menu bottom-end'>
             <DropdownMenu
               items={items}

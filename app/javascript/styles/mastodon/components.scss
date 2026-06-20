@@ -2804,6 +2804,52 @@ a.account__display-name {
   margin-inline-start: auto;
 }
 
+@keyframes account-switcher-sheet {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media screen and (width <= 759px) {
+  .account-switcher__dropdown {
+    align-items: flex-end;
+    background: rgb(from var(--color-bg-overlay) r g b / 60%);
+    display: flex;
+    inset: 0 0 calc(var(--mobile-bottom-nav-height) + env(safe-area-inset-bottom));
+    justify-content: center;
+    min-width: 0;
+    padding: 0 12px;
+    position: fixed;
+    z-index: 10000;
+
+    .dropdown-menu {
+      animation: account-switcher-sheet 160ms ease-out;
+      border-radius: 16px 16px 0 0;
+      box-shadow: var(--dropdown-shadow);
+      max-height: min(
+        calc(100vh - var(--mobile-bottom-nav-height) - env(safe-area-inset-bottom) - 24px),
+        520px
+      );
+      min-width: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      width: min(100%, 420px);
+    }
+  }
+
+  .account-switcher__menu-item button,
+  .account-switcher__account-row {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
 .display-name {
   display: block;
   max-width: 100%;
@@ -3569,12 +3615,15 @@ a.account__display-name {
     pointer-events: auto;
     background: var(--color-bg-primary);
     position: fixed;
-    width: 284px + 70px;
-    inset-inline-end: -70px;
+    top: 0;
+    bottom: 0;
+    width: min(284px, 100vw);
+    inset-inline-end: 0;
+    transform: translateX(100%);
     touch-action: pan-y;
 
     .navigation-panel {
-      width: 284px;
+      width: min(284px, 100vw);
       overflow-y: auto;
       scrollbar-width: thin;
 
@@ -3589,6 +3638,17 @@ a.account__display-name {
         display: none;
       }
     }
+  }
+
+  .columns-area__panels__pane--navigational
+    .columns-area__panels__pane__inner--open {
+    transform: translateX(0) !important;
+  }
+
+  [dir='rtl']
+    .columns-area__panels__pane--navigational
+    .columns-area__panels__pane__inner {
+    transform: translateX(-100%);
   }
 }
 

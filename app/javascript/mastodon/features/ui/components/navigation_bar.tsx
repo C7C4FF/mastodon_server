@@ -8,6 +8,8 @@ import { NavLink, useRouteMatch } from 'react-router-dom';
 import AddIcon from '@/material-icons/400-24px/add.svg?react';
 import HomeActiveIcon from '@/material-icons/400-24px/home-fill.svg?react';
 import HomeIcon from '@/material-icons/400-24px/home.svg?react';
+import MailActiveIcon from '@/material-icons/400-24px/mail-fill.svg?react';
+import MailIcon from '@/material-icons/400-24px/mail.svg?react';
 import MenuIcon from '@/material-icons/400-24px/menu.svg?react';
 import NotificationsActiveIcon from '@/material-icons/400-24px/notifications-fill.svg?react';
 import NotificationsIcon from '@/material-icons/400-24px/notifications.svg?react';
@@ -19,6 +21,7 @@ import { IconWithBadge } from 'mastodon/components/icon_with_badge';
 import type { MastodonLocationDescriptor } from 'mastodon/components/router';
 import { useIdentity } from 'mastodon/identity_context';
 import { registrationsOpen, sso_redirect } from 'mastodon/initial_state';
+import { selectUnreadConversationsCount } from 'mastodon/reducers/conversations';
 import { selectUnreadNotificationGroupsCount } from 'mastodon/selectors/notifications';
 import { useAppDispatch, useAppSelector } from 'mastodon/store';
 
@@ -29,6 +32,7 @@ export const messages = defineMessages({
     id: 'tabs_bar.notifications',
     defaultMessage: 'Notifications',
   },
+  direct: { id: 'navigation_bar.direct', defaultMessage: 'Direct messages' },
   menu: { id: 'tabs_bar.menu', defaultMessage: 'Menu' },
   advancedUiQuickLinks: {
     id: 'tabs_bar.quick_links',
@@ -82,6 +86,34 @@ const NotificationsButton = () => {
         />
       }
       title={intl.formatMessage(messages.notifications)}
+    />
+  );
+};
+
+const DirectButton = () => {
+  const count = useAppSelector(selectUnreadConversationsCount);
+  const intl = useIntl();
+
+  return (
+    <IconLabelButton
+      to='/conversations'
+      icon={
+        <IconWithBadge
+          id='mail'
+          icon={MailIcon}
+          count={count}
+          className=''
+        />
+      }
+      activeIcon={
+        <IconWithBadge
+          id='mail'
+          icon={MailActiveIcon}
+          count={count}
+          className=''
+        />
+      }
+      title={intl.formatMessage(messages.direct)}
     />
   );
 };
@@ -189,6 +221,7 @@ export const NavigationBar: React.FC = () => {
               icon={<Icon id='' icon={AddIcon} />}
             />
             <NotificationsButton />
+            <DirectButton />
           </>
         )}
 

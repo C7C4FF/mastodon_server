@@ -3,3 +3,21 @@
 .logo {
   color: var(--color-text-primary);
 }
+
+.logo--c7c4ff {
+  object-fit: contain;
+}
+
+.logo--wordmark.logo--c7c4ff {
+  height: 66px;
+  width: 66px;
+}
+
+@media screen and (width <= 759px) {
+  .logo,
+  .ui__header__logo,
+  .column-link.column-link--logo {
+    background-image: none !important;
+    display: none !important;
+  }
+}

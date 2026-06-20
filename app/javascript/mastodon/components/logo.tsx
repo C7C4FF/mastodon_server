@@ -1,25 +1,23 @@
 import classNames from 'classnames';
 
-import logo from '@/images/logo.svg';
+import logo from '@/images/c7c4ff_logo_icon.png';
 
 export const WordmarkLogo: React.FC = () => (
-  <svg viewBox='0 0 261 66' className='logo logo--wordmark' role='img'>
-    <title>Mastodon</title>
-    <use xlinkHref='#logo-symbol-wordmark' />
-  </svg>
+  <img
+    src={logo}
+    alt='C7C4FF'
+    className='logo logo--wordmark logo--c7c4ff'
+  />
 );
 
 export const IconLogo: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    viewBox='0 0 79 79'
-    className={classNames('logo logo--icon', className)}
-    role='img'
-  >
-    <title>Mastodon</title>
-    <use xlinkHref='#logo-symbol-icon' />
-  </svg>
+  <img
+    src={logo}
+    alt='C7C4FF'
+    className={classNames('logo logo--icon logo--c7c4ff', className)}
+  />
 );
 
 export const SymbolLogo: React.FC = () => (
-  <img src={logo} alt='Mastodon' className='logo logo--icon' />
+  <img src={logo} alt='C7C4FF' className='logo logo--icon logo--c7c4ff' />
 );

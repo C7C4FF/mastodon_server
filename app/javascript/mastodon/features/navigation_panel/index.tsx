@@ -469,18 +469,23 @@ export const CollapsibleNavigationPanel: React.FC = () => {
     }
   }, [open]);
 
-  const showOverlay = openable && open;
+  const showOverlay = open;
 
   return (
     <div
       className={classNames(
         'columns-area__panels__pane columns-area__panels__pane--start columns-area__panels__pane--navigational',
-        { 'columns-area__panels__pane--overlay': showOverlay },
+        {
+          'columns-area__panels__pane--open': open,
+          'columns-area__panels__pane--overlay': showOverlay,
+        },
       )}
       ref={overlayRef}
     >
       <animated.div
-        className='columns-area__panels__pane__inner'
+        className={classNames('columns-area__panels__pane__inner', {
+          'columns-area__panels__pane__inner--open': open,
+        })}
         {...bind()}
         style={openable ? { x } : undefined}
       >
