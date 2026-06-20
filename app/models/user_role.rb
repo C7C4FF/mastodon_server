@@ -53,7 +53,7 @@ class UserRole < ApplicationRecord
     NONE = 0
     ALL  = FLAGS.values.reduce(&:|)
 
-    DEFAULT = FLAGS[:invite_users]
+    DEFAULT = NONE
     SAFE = FLAGS[:invite_users] | FLAGS[:invite_bypass_approval]
 
     CATEGORIES = {

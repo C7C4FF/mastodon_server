@@ -6,7 +6,7 @@ class InvitePolicy < ApplicationPolicy
   end
 
   def create?
-    role.can?(:invite_users)
+    role.can?(:invite_users) || role.can?(:manage_invites)
   end
 
   def deactivate_all?
